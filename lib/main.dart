@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'core/styles.dart';
+import 'core/ui_helper.dart';
+import 'ui/screens/home_screen.dart';
+import 'ui/screens/login_screen.dart';
+import 'ui/screens/profile_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -9,14 +14,23 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+    return MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        colorScheme: const ColorScheme.light().copyWith(
+          primary: greenv2,
+          secondary: orangev2,
         ),
       ),
+      debugShowCheckedModeBanner: false,
+      routes: {
+        '/': (context) => const LoginScreen(),
+        '/home-screen': (context) => const HomeScreen(),
+        '/profile-screen': (context) => const ProfileScreen(),
+      },
     );
   }
 }
 
-// rafiknurf
+// created by rafiknurf
