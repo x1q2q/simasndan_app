@@ -25,15 +25,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: <Widget>[
                   CircleAvatar(
                     backgroundColor: orangev2,
-                    radius: 90,
+                    radius: 70,
                     child: Container(
                         height: 120,
                         width: 120,
                         decoration: const BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(100)),
                             image: DecorationImage(
                                 alignment: Alignment.center,
                                 fit: BoxFit.fill,
-                                image: AssetImage('assets/images/giyu.jpg')))),
+                                image:
+                                    AssetImage('assets/images/tokito.PNG')))),
                   ),
                   verticalSpaceSmall,
                   const Center(
@@ -50,8 +53,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 30),
                       child: Column(
                         children: <Widget>[
-                          _boxField(context, 'Nama', 'Rizqi Umami'),
+                          _boxField(context, 'Nama', 'Rizqi Ummami'),
                           _boxField(context, 'Tingkatan', 'Wustho'),
+                          _boxField(context, 'Status', 'Santri Biasa'),
                           _boxField(context, 'TTL', 'Kebumen, 05 Juni 2000'),
                           _boxField(context, 'Pendidikan', 'S2 Matematika UNS'),
                           _boxField(context, 'Alamat', 'Jl. Kebumen Raya'),
@@ -73,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Container(
         decoration: const BoxDecoration(
             border: Border(bottom: BorderSide(color: greenv1))),
-        padding: const EdgeInsets.fromLTRB(15, 8, 15, 8),
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

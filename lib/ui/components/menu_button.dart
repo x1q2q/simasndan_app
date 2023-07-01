@@ -42,7 +42,6 @@ class MenuButton extends StatelessWidget {
                     : menuBtn3,
             splashColor: orangev1,
             focusColor: orangev1,
-            hoverColor: Colors.orange,
             onTap: onTap,
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

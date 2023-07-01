@@ -3,6 +3,7 @@ import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../components/my_text_field.dart';
 import '../components/my_button.dart';
+import '../components/base_alert.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -17,6 +18,20 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    var screenSizes = MediaQuery.of(context).size;
+    _checkNama(BuildContext ctx) async {
+      await showDialog(
+          context: ctx,
+          builder: (BuildContext context) {
+            return BaseAlert(
+              bgColor: orangev1,
+              title: "Perinatan!",
+              msg: "Username atau password masih kosong!",
+              onTap: () => Navigator.pop(context),
+            );
+          });
+    }
+
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -52,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Stack(
                   children: [
                     Container(
-                      height: 560,
+                      height: screenSizes.height,
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         color: lightv1,
@@ -122,12 +137,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: MyButton(
                                     type: 'elevicon',
                                     icon: Icons.login,
-                                    onTap: () => {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const HomeScreen()))
+                                    onTap: () {
+                                      if (usernameController.text.isNotEmpty &&
+                                          passwordController.text.isNotEmpty) {
+                                        String uname = usernameController.text;
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    HomeScreen(
+                                                        inputName: uname)));
+                                      } else {
+                                        _checkNama(context);
+                                      }
                                     },
                                     btnText: 'Masuk',
                                   )),
@@ -136,7 +158,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: MyButton(
                                     type: 'outlineicon',
                                     icon: Icons.store,
-                                    onTap: () => {},
+                                    onTap: () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return BaseAlert(
+                                              bgColor: lightv2,
+                                              title: "Informasi",
+                                              msg:
+                                                  "Fitur ini tersedia nanti yaa hehe :D",
+                                              onTap: () =>
+                                                  Navigator.pop(context),
+                                            );
+                                          });
+                                    },
                                     btnText: 'Masuk dengan Google',
                                   )),
                                 ],
