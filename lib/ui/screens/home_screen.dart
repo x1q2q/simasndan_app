@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../../ui/components/menu_button.dart';
 import 'profile_screen.dart';
+import 'berita_screen.dart';
+import 'materi_screen.dart';
+import 'rekap_screen.dart';
+import 'detail_berita_screen.dart';
+import '../components/base_alert.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key, this.inputName}) : super(key: key);
+  final String? inputName;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,6 +21,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    var screenSizes = MediaQuery.of(context).size;
+    String nama = widget.inputName ?? '';
+    String greetingTxt = 'Assalamualaikum wr wb, ${nama}!';
+    DateTime skrg = DateTime.now();
+
     return SafeArea(
         child: Scaffold(
             backgroundColor: greenv2,
@@ -26,17 +38,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              const Expanded(
+                              Expanded(
                                 child: Wrap(
                                   direction: Axis.vertical,
                                   children: <Widget>[
-                                    Text("Assalamualaikum wr wb, Sahabat!",
-                                        style: TextStyle(
+                                    Text(greetingTxt,
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16,
                                             fontFamily: 'Poppins',
                                             color: Colors.white)),
-                                    Text("Surakarta, 21 Juni 2023",
+                                    const Text("Surakarta, 21 Juni 2023",
                                         style: TextStyle(
                                             fontFamily: 'Poppins',
                                             color: Colors.white)),
@@ -83,14 +95,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   backgroundColor: orangev1,
                                   radius: 30,
                                   child: Container(
-                                      height: 40,
-                                      width: 40,
-                                      decoration: const BoxDecoration(
-                                          image: DecorationImage(
-                                              alignment: Alignment.center,
-                                              fit: BoxFit.fill,
-                                              image: AssetImage(
-                                                  'assets/images/logo_pondok.png')))),
+                                    height: 40,
+                                    width: 40,
+                                    child: const Icon(Icons.campaign,
+                                        color: orangev3, size: 40),
+                                  ),
                                 ),
                               ],
                             ),
@@ -118,18 +127,36 @@ class _HomeScreenState extends State<HomeScreen> {
                                 btnTxt: "Berita",
                                 iconBtn: Icons.newspaper,
                                 typeBtn: 'btn1',
-                                onTap: () => {},
+                                onTap: () => {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const BeritaScreen()))
+                                },
                               ),
                               MenuButton(
                                   btnTxt: "Materi",
                                   iconBtn: Icons.menu_book,
                                   typeBtn: 'btn2',
-                                  onTap: () => {}),
+                                  onTap: () => {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const MateriScreen()))
+                                      }),
                               MenuButton(
                                   btnTxt: "Rekap",
                                   iconBtn: Icons.timeline,
                                   typeBtn: 'btn2',
-                                  onTap: () => {}),
+                                  onTap: () => {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const RekapScreen()))
+                                      }),
                               MenuButton(
                                   btnTxt: "Profil",
                                   iconBtn: Icons.person,
@@ -151,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 0,
                   ),
                   Container(
-                      height: 580,
+                      height: screenSizes.height,
                       width: double.infinity,
                       color: lightv1,
                       child: Column(
@@ -178,7 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _boxNews(context),
                                 _boxNews(context),
                                 _boxNews(context),
-                                _boxNews(context),
                               ],
                             ),
                           )
@@ -191,14 +217,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _boxNews(BuildContext context) {
     return Material(
-      color: lightv2,
+      color: Colors.white,
       child: InkWell(
-          onTap: () {},
-          splashColor: greenv2,
+          onTap: () => {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DetailBeritaScreen(
+                              idBerita: '1',
+                            )))
+              },
+          splashColor: greenv1,
           child: Container(
             decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: greenv1))),
-            padding: const EdgeInsets.fromLTRB(15, 8, 15, 8),
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
             child: Row(
               children: [
                 const Flexible(
@@ -207,15 +240,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Judul Berita satu',
+                        'Pemberitahuan Santri Masuk ke pondok pesantren',
+                        maxLines: 2,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 15,
                             fontFamily: 'Poppins',
                             color: Colors.black87),
                       ),
                       Text(
                         softWrap: true,
+                        maxLines: 2,
                         'lorem ipsum dolor sit amet consecteur dolor sit amet banget uh juni plan plan pak sopirr. spontan uhuyy',
                         style: TextStyle(fontSize: 13, color: Colors.black54),
                       )

@@ -7,7 +7,7 @@ const Color greenv1 = Color.fromARGB(255, 21, 185, 96);
 const Color greenv2 = Color.fromARGB(255, 81, 202, 135);
 const Color greenv3 = Color.fromARGB(255, 64, 189, 121);
 
-const Color orangev1 = Color.fromARGB(255, 251, 224, 147);
+const Color orangev1 = Color.fromARGB(255, 255, 246, 1212);
 const Color orangev2 = Color.fromARGB(255, 252, 199, 9);
 const Color orangev3 = Color.fromARGB(255, 187, 148, 8);
 

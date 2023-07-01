@@ -7,10 +7,26 @@ class Styles {
   static const labelTxtStyle = TextStyle(
       fontFamily: 'Poppins',
       fontWeight: FontWeight.w600,
-      color: Color.fromARGB(255, 21, 185, 96),
+      color: greenv1,
       fontSize: 16);
+
+  static const labelTxtStyle2 = TextStyle(
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w600,
+      color: orangev3,
+      fontSize: 16);
+
   static const titleBarStyle = TextStyle(
       fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: orangev3);
+
+  static const filterStyle = TextStyle(
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.normal,
+      color: orangev3,
+      fontSize: 12);
+
+  static const badgeStyle = TextStyle(
+      fontWeight: FontWeight.normal, color: Colors.white, fontSize: 11);
   static final ButtonStyle elevBtnStyle = ElevatedButton.styleFrom(
       elevation: 0.5,
       backgroundColor: greenv3,
@@ -44,7 +60,7 @@ class Styles {
   static const smallStyle = TextStyle(
       fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w500);
   static const verySmallStyle = TextStyle(
-      fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w500);
+      fontFamily: 'Poppins', fontSize: 10, fontWeight: FontWeight.w500);
 }
 
 // by rafiknurf
