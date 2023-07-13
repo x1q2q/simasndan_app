@@ -17,7 +17,7 @@ class DefAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: orangev1,
       elevation: 0.3,
       title: Text(title, style: Styles.titleBarStyle),
-      centerTitle: true,
+      centerTitle: false,
       actions: actBtn,
     );
   }
