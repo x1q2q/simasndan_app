@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../../ui/components/menu_button.dart';
-import 'profile_screen.dart';
-import 'berita_screen.dart';
-import 'materi_screen.dart';
+import '../components/base_alert.dart';
+import 'profil_screen.dart';
 import 'rekap_screen.dart';
 import 'detail_berita_screen.dart';
-import '../components/base_alert.dart';
+import 'notifikasi_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, this.inputName}) : super(key: key);
@@ -23,8 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     var screenSizes = MediaQuery.of(context).size;
     String nama = widget.inputName ?? '';
-    String greetingTxt = 'Assalamualaikum wr wb, ${nama}!';
-    DateTime skrg = DateTime.now();
+    String greetingTxt = 'Assalamualaikum wr wb, $nama!';
 
     return SafeArea(
         child: Scaffold(
@@ -61,7 +58,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 icon: const Icon(
                                   Icons.notifications,
                                 ),
-                                onPressed: () => {},
+                                onPressed: () => {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const NotifikasiScreen(
+                                                idSantri: '1',
+                                              )))
+                                },
                               )
                             ],
                           ),
@@ -128,11 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 iconBtn: Icons.newspaper,
                                 typeBtn: 'btn1',
                                 onTap: () => {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const BeritaScreen()))
+                                  Navigator.of(context)
+                                      .pushNamed("/berita-screen")
                                 },
                               ),
                               MenuButton(
@@ -140,11 +142,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   iconBtn: Icons.menu_book,
                                   typeBtn: 'btn2',
                                   onTap: () => {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const MateriScreen()))
+                                        Navigator.of(context)
+                                            .pushNamed("/materi-screen")
                                       }),
                               MenuButton(
                                   btnTxt: "Rekap",
@@ -166,7 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const ProfileScreen()))
+                                                    const ProfilScreen(
+                                                        idSantri: '1')))
                                       })
                             ],
                           ))
@@ -259,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(width: 10),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.18,
+                  width: MediaQuery.of(context).size.width * 0.3,
                   child: Image.asset(
                     "assets/images/luffyeeeh.jpg",
                     fit: BoxFit.fill,

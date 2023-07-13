@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../components/def_appbar.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
-import '../components/my_button.dart';
 import 'detail_berita_screen.dart';
 
 class BeritaScreen extends StatefulWidget {

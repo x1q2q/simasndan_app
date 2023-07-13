@@ -5,6 +5,7 @@ import '../components/my_text_field.dart';
 import '../components/my_button.dart';
 import '../components/base_alert.dart';
 import 'home_screen.dart';
+import '../../providers/services/get_data.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +17,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+
+  final GetData getData = GetData();
+
   @override
   Widget build(BuildContext context) {
     var screenSizes = MediaQuery.of(context).size;
@@ -67,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Stack(
                   children: [
                     Container(
-                      height: screenSizes.height,
+                      height: screenSizes.height / 1.6,
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         color: lightv1,
@@ -96,7 +100,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   verticalSpaceXSmall,
                                   MyTextField(
                                     controller: usernameController,
-                                    onChanged: (() => {}),
                                     hintText: "masukkan username",
                                     obscureText: false,
                                     icon: const Icon(Icons.person),
@@ -137,27 +140,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: MyButton(
                                     type: 'elevicon',
                                     icon: Icons.login,
-                                    onTap: () {
-                                      if (usernameController.text.isNotEmpty &&
-                                          passwordController.text.isNotEmpty) {
-                                        String uname = usernameController.text;
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    HomeScreen(
-                                                        inputName: uname)));
-                                      } else {
-                                        _checkNama(context);
-                                      }
+                                    onTap: () async => {
+                                      _submit(context, usernameController.text,
+                                          passwordController.text)
                                     },
                                     btnText: 'Masuk',
                                   )),
                                   verticalSpaceXSmall,
                                   Center(
                                       child: MyButton(
-                                    type: 'outlineicon',
-                                    icon: Icons.store,
+                                    type: 'outline',
                                     onTap: () {
                                       showDialog(
                                           context: context,
@@ -189,5 +181,33 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _submit(BuildContext ctx, String username, String password) async {
+    bool resSubmit;
+    Map<String, dynamic> dataField = {
+      'username': username,
+      'password': password
+    };
+    resSubmit = await getData.login(dataField);
+    if (resSubmit) {
+      Navigator.of(ctx).pushNamed("/home-screen");
+      _showMsg(ctx, true, "Anda sukses login!");
+    } else {
+      _showMsg(ctx, false, "Gagal login. User tidak ditemukan!");
+    }
+  }
+
+  _showMsg(BuildContext ctx, bool isSukses, String msg) async {
+    await showDialog(
+        context: ctx,
+        builder: (BuildContext context) {
+          return BaseAlert(
+            bgColor: (isSukses) ? lightv2 : orangev2,
+            title: (isSukses) ? 'Berhasil!' : 'Error!',
+            msg: msg,
+            onTap: () => {Navigator.of(context).pop()},
+          );
+        });
   }
 }
