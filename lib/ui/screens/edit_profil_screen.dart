@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
+import 'dart:io';
 import '../components/def_appbar.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
@@ -9,6 +9,8 @@ import '../components/profil_text_field.dart';
 import '../../core/api.dart';
 import '../../providers/models/santri.dart';
 import '../../providers/services/get_data.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../ui/components/menu_button.dart';
 
 class EditProfilScreen extends StatefulWidget {
   final String? idSantri;
@@ -29,6 +31,21 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   bool _isLoading = true;
+  bool btnPhotoPressed = false;
+
+  XFile? image;
+  File? filePhoto;
+
+  final ImagePicker picker = ImagePicker();
+
+  Future getImage(ImageSource media) async {
+    var img = await picker.pickImage(source: media);
+
+    setState(() {
+      image = img;
+      filePhoto = File(image!.path);
+    });
+  }
 
   @override
   void initState() {
@@ -46,6 +63,47 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
     alamatCtrl.text = dtSantri!.alamat;
     _isLoading = false;
     setState(() {});
+  }
+
+  void myAlert() {
+    btnPhotoPressed = true;
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: lightv2,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            title: const Text('Pilih media untuk diupload',
+                style: Styles.labelTxtStyle),
+            content: Container(
+              height: 130,
+              width: MediaQuery.of(context).size.width / 2,
+              child: GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                children: <Widget>[
+                  MenuButton(
+                      btnTxt: "Galeri",
+                      iconBtn: Icons.image,
+                      typeBtn: 'btn1',
+                      onTap: () {
+                        Navigator.pop(context);
+                        getImage(ImageSource.gallery);
+                      }),
+                  MenuButton(
+                      btnTxt: "Kamera",
+                      iconBtn: Icons.photo_camera,
+                      typeBtn: 'btn3',
+                      onTap: () {
+                        Navigator.pop(context);
+                        getImage(ImageSource.camera);
+                      }),
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   @override
@@ -67,6 +125,12 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
       return (foto == null || foto == '-' || foto == '');
     }
 
+    ImageProvider<Object> chooseImage(dynamic foto) {
+      return (checkIsValidImage(foto))
+          ? const NetworkImage("${Api.baseURL}/assets/img/no-image.png")
+          : NetworkImage("${Api.baseURL}/assets/img/uploads/santri/${foto}");
+    }
+
     return _isLoading
         ? const Center(
             child: CircularProgressIndicator(
@@ -85,20 +149,26 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                     CircleAvatar(
                       backgroundColor: orangev2,
                       radius: 70,
-                      child: Container(
-                          height: 120,
-                          width: 120,
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(100)),
-                              image: DecorationImage(
-                                  alignment: Alignment.center,
-                                  fit: BoxFit.cover,
-                                  image: (checkIsValidImage(dtSantri!.foto))
-                                      ? const NetworkImage(
-                                          "${Api.baseURL}/assets/img/no-image.png")
-                                      : NetworkImage(
-                                          "${Api.baseURL}/assets/img/uploads/santri/${dtSantri!.foto}")))),
+                      child: (btnPhotoPressed && image != null)
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.file(
+                                File(image!.path),
+                                fit: BoxFit.cover,
+                                height: 120,
+                                width: 120,
+                              ),
+                            )
+                          : Container(
+                              height: 120,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(100)),
+                                  image: DecorationImage(
+                                      alignment: Alignment.center,
+                                      fit: BoxFit.cover,
+                                      image: chooseImage(dtSantri!.foto)))),
                     ),
                     Positioned(
                         bottom: 0,
@@ -110,7 +180,9 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                                 iconSize: 25,
                                 color: Colors.white,
                                 icon: const Icon(Icons.photo_camera),
-                                onPressed: () {}))),
+                                onPressed: () {
+                                  myAlert();
+                                }))),
                   ],
                 ),
                 verticalSpaceXSmall,
@@ -171,9 +243,10 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
       'universitas': univCtrl.text,
       'alamat': alamatCtrl.text
     };
-    final dtSantri = Santri.fromJson(dataField);
+    final dtSantri = Santri.fromMap(dataField);
     String idSantri = dataField['id'];
-    resSubmit = await getData.updateProfil(dtSantri, idSantri);
+    resSubmit = await getData.updateProfil(
+        dtSantri, idSantri, filePhoto!, filePhoto!.path.split('/').last);
     if (resSubmit) {
       _showMsg(ctx, true, "Sukses memperbarui profil!");
     } else {

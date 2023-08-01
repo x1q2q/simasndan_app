@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../../ui/components/menu_button.dart';
-import '../components/base_alert.dart';
 import 'profil_screen.dart';
 import 'rekap_screen.dart';
 import 'detail_berita_screen.dart';
 import 'notifikasi_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, this.inputName}) : super(key: key);
@@ -17,6 +18,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    initializeDateFormatting();
+  }
+
+  String tglNow() {
+    return DateFormat("dd MMMM yyyy", "id_ID")
+        .format(DateTime.now())
+        .toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     var screenSizes = MediaQuery.of(context).size;
@@ -45,8 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 16,
                                             fontFamily: 'Poppins',
                                             color: Colors.white)),
-                                    const Text("Surakarta, 21 Juni 2023",
-                                        style: TextStyle(
+                                    Text("Surakarta, ${tglNow()}",
+                                        style: const TextStyle(
                                             fontFamily: 'Poppins',
                                             color: Colors.white)),
                                   ],

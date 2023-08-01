@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (BuildContext context) {
             return BaseAlert(
               bgColor: orangev1,
-              title: "Perinatan!",
+              title: "Peringatan!",
               msg: "Username atau password masih kosong!",
               onTap: () => Navigator.pop(context),
             );

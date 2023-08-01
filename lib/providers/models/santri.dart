@@ -22,7 +22,7 @@ class Santri {
     required this.isPengurus,
     required this.universitas,
   });
-  factory Santri.fromJson(Map<String, dynamic> json) {
+  factory Santri.fromMap(Map<String, dynamic> json) {
     return Santri(
         id: json['id'].toString(),
         username: json['username'],
@@ -38,6 +38,7 @@ class Santri {
   Map toJson() {
     return {
       'id': id,
+      'username': username,
       'nama_santri': namaSantri,
       'tempat_lahir': tempatLahir,
       'tgl_lahir': tglLahir,
