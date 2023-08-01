@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import 'dart:convert';
 import '../models/materi.dart';
 import '../models/santri.dart';
+import '../models/berita.dart';
 import '../../core/api.dart';
+import 'dart:io';
 
 class GetData {
   Dio dio = Dio();
@@ -39,7 +41,7 @@ class GetData {
     try {
       Response resp = await dio.get(urlGet);
       if (resp.statusCode == 200) {
-        return Santri.fromJson(resp.data['data']);
+        return Santri.fromMap(resp.data['data']);
       } else {
         throw Exception('error server');
       }
@@ -48,15 +50,22 @@ class GetData {
     }
   }
 
-  Future<bool> updateProfil(Santri dtSantri, String id) async {
+  Future<bool> updateProfil(
+      Santri dtSantri, String id, File empFace, String empCode) async {
     bool res;
+    FormData formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(empFace.path, filename: empCode),
+      ...dtSantri.toJson()
+    });
     try {
-      Response resp =
-          await dio.put('${Api.getSantri}/$id', data: dtSantri.toJson());
+      Response resp = await dio.post('${Api.getSantri}/$id?_method=PUT',
+          data: formData,
+          options: Options(headers: {'Content-Type': 'multipart/form-data'}));
       print(resp.toString());
       res = true;
     } catch (e) {
       res = false;
+      print(e.toString());
     }
     return res;
   }
@@ -70,5 +79,47 @@ class GetData {
       res = false;
     }
     return res;
+  }
+
+  Future<List> allBerita() async {
+    String urlGet = Api.getBerita;
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<List> filteredBerita(String filter) async {
+    String urlGet = '${Api.getBeritaFilter}/$filter';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<Berita> detailBerita(String? idBerita) async {
+    String urlGet = '${Api.getBerita}/$idBerita';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return Berita.fromMap(resp.data['data']);
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
   }
 }
