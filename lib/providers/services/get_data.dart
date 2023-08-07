@@ -122,4 +122,32 @@ class GetData {
       throw Exception('error $e');
     }
   }
+
+  Future<List> allSemester(String? idSantri) async {
+    String urlGet = '${Api.getSemester}/$idSantri';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<List> allPenilaian(String? idSantri, String? idSemt) async {
+    String urlGet = '${Api.getTimeline}/$idSantri/$idSemt';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
 }

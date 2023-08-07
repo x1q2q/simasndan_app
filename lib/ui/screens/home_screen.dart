@@ -167,7 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const RekapScreen()))
+                                                    const RekapScreen(
+                                                        idSantri: '1')))
                                       }),
                               MenuButton(
                                   btnTxt: "Profil",

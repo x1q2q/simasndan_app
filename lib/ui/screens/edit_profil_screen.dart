@@ -245,8 +245,9 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
     };
     final dtSantri = Santri.fromMap(dataField);
     String idSantri = dataField['id'];
-    resSubmit = await getData.updateProfil(
-        dtSantri, idSantri, filePhoto!, filePhoto!.path.split('/').last);
+    String filePath = filePhoto!.path.split('/').last;
+    resSubmit =
+        await getData.updateProfil(dtSantri, idSantri, filePhoto!, filePath);
     if (resSubmit) {
       _showMsg(ctx, true, "Sukses memperbarui profil!");
     } else {
