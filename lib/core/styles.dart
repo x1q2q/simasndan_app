@@ -54,6 +54,12 @@ class Styles {
       fontWeight: FontWeight.bold,
       color: orangev3);
 
+  static const boxCardShdStyle = BoxShadow(
+      offset: Offset(0, 0),
+      blurRadius: 7,
+      spreadRadius: 1,
+      color: Colors.black12);
+
   static const bodyStyle = TextStyle(
       fontFamily: 'Poppins', fontSize: 19, fontWeight: FontWeight.w600);
 

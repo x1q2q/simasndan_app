@@ -16,6 +16,7 @@ class _WebviewScreenState extends State<WebviewScreen> {
   @override
   void initState() {
     String newUrl = widget.urlWeb ?? Api.baseURL;
+    print(newUrl);
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(

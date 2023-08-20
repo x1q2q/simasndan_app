@@ -66,74 +66,76 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
               color: greenv3,
             ),
           )
-        : ListView(children: <Widget>[
-            Container(
-                padding: const EdgeInsets.all(25),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                        child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        : ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+                Container(
+                    padding: const EdgeInsets.all(25),
+                    child: Row(
                       children: <Widget>[
-                        Text("Semester ${widget.semester}",
-                            style: Styles.headStyle),
-                        Text("Tahun Pelajaran ${widget.thPelajaran}",
-                            style: const TextStyle(
-                                color: orangev3,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 16)),
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text("Semester ${widget.semester}",
+                                style: Styles.headStyle),
+                            Text("Tahun Pelajaran ${widget.thPelajaran}",
+                                style: const TextStyle(
+                                    color: orangev3,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16)),
+                          ],
+                        )),
+                        const IconButton(
+                          iconSize: 70,
+                          icon: Icon(
+                            Icons.bookmark,
+                            color: orangev3,
+                          ),
+                          onPressed: null,
+                        )
                       ],
                     )),
-                    const IconButton(
-                      iconSize: 70,
-                      icon: Icon(
-                        Icons.bookmark,
-                        color: orangev3,
+                Stack(children: [
+                  Container(
+                      padding: const EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      constraints: BoxConstraints(
+                          minHeight: screenSizes.height,
+                          minWidth: screenSizes.width,
+                          maxHeight: double.infinity),
+                      decoration: const BoxDecoration(
+                        color: orangev1,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
                       ),
-                      onPressed: null,
-                    )
-                  ],
-                )),
-            Stack(children: [
-              Container(
-                  padding: const EdgeInsets.fromLTRB(25, 25, 25, 25),
-                  constraints: BoxConstraints(
-                      minHeight: screenSizes.height,
-                      minWidth: screenSizes.width,
-                      maxHeight: double.infinity),
-                  decoration: const BoxDecoration(
-                    color: orangev1,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                            decoration: const BoxDecoration(
-                                border: Border(
-                                    left:
-                                        BorderSide(color: orangev3, width: 3))),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 2.0, horizontal: 8.0),
-                            child: const Text("Tracking Progress Belajar",
-                                style: Styles.labelTxtStyle2)),
-                        verticalSpaceSmall,
-                        ListView.builder(
-                            itemCount: allPenilaian!.length,
-                            shrinkWrap: true,
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemBuilder: (_, index) {
-                              return _timelineTrack(
-                                  context,
-                                  allPenilaian![index]['materi'],
-                                  allPenilaian![index]['penilaian']);
-                            })
-                      ]))
-            ]),
-          ]);
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                                decoration: const BoxDecoration(
+                                    border: Border(
+                                        left: BorderSide(
+                                            color: orangev3, width: 3))),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 2.0, horizontal: 8.0),
+                                child: const Text("Tracking Progress Belajar",
+                                    style: Styles.labelTxtStyle2)),
+                            verticalSpaceSmall,
+                            ListView.builder(
+                                itemCount: allPenilaian!.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemBuilder: (_, index) {
+                                  return _timelineTrack(
+                                      context,
+                                      allPenilaian![index]['materi'],
+                                      allPenilaian![index]['penilaian']);
+                                })
+                          ]))
+                ]),
+              ]);
   }
 
   Widget _timelineTrack(BuildContext context, String materi, List timeline) {
@@ -145,7 +147,7 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
         Text(materi, style: Styles.labelTxtStyle2),
         ListView.builder(
             shrinkWrap: true,
-            physics: const ScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: timeline.length,
             itemBuilder: (context, i) {
               var waktu = timeline[i]['waktu_mulai'].substring(0, 16);

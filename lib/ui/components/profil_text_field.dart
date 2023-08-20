@@ -55,7 +55,9 @@ class _ProfilTextFieldState extends State<ProfilTextField> {
           : () async {
               DateTime? pickedDate = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.parse(widget.controller.text),
+                  initialDate: (widget.controller.text == '')
+                      ? DateTime.now()
+                      : DateTime.parse(widget.controller.text),
                   firstDate: DateTime(1900),
                   lastDate: DateTime(2101));
 

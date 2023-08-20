@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import '../components/def_appbar.dart';
 import '../../core/ui_helper.dart';
-import '../../core/styles.dart';
-import '../components/my_button.dart';
 import 'detail_rekap_screen.dart';
 import '../../providers/services/get_data.dart';
-import '../../core/api.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 enum MenuPopup { itemOne, itemTwo }
 
@@ -23,10 +21,12 @@ class _RekapScreenState extends State<RekapScreen> {
       GlobalKey<RefreshIndicatorState>();
   bool _isLoading = true;
   MenuPopup? selectedMenu;
+  late final Box box;
 
   @override
   void initState() {
     super.initState();
+    box = Hive.box('user');
     _getData();
   }
 
@@ -122,7 +122,7 @@ class _RekapScreenState extends State<RekapScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => DetailRekapScreen(
-                                        idSantri: '1',
+                                        idSantri: box.get('id').toString(),
                                         idSemester: allSemester![index]['id']
                                             .toString(),
                                         semester: allSemester![index]

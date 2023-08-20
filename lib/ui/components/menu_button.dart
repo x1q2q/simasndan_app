@@ -44,7 +44,7 @@ class MenuButton extends StatelessWidget {
             focusColor: orangev1,
             onTap: onTap,
             child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Icon(iconBtn!, color: orangev2, size: 55),
                   Text(btnTxt, style: menuTxt)
