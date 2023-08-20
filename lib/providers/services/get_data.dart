@@ -50,13 +50,14 @@ class GetData {
     }
   }
 
-  Future<bool> updateProfil(
-      Santri dtSantri, String id, File empFace, String empCode) async {
+  Future<bool> updateProfil(Santri dtSantri, String id, File? filePhoto) async {
     bool res;
-    FormData formData = FormData.fromMap({
-      'image': await MultipartFile.fromFile(empFace.path, filename: empCode),
-      ...dtSantri.toJson()
-    });
+    Map<String, dynamic> data = {'image': null, ...dtSantri.toJson()};
+    if (filePhoto != null) {
+      data["image"] = await MultipartFile.fromFile(filePhoto.path,
+          filename: filePhoto.path.split('/').last);
+    }
+    FormData formData = FormData.fromMap(data);
     try {
       Response resp = await dio.post('${Api.getSantri}/$id?_method=PUT',
           data: formData,
@@ -70,13 +71,20 @@ class GetData {
     return res;
   }
 
-  Future<bool> login(Map<String, dynamic> data) async {
-    bool res;
+  Future<Map<String, dynamic>> login(Map<String, dynamic> data) async {
+    Map<String, dynamic> res = {"success": bool, "data": Santri};
     try {
       Response resp = await dio.post(Api.login, data: json.encode(data));
-      res = true;
+      print(resp.toString());
+      if (resp.statusCode == 200) {
+        res["success"] = true;
+        res["data"] = Santri.fromMap(resp.data['data']);
+      } else {
+        throw Exception('error server');
+      }
     } catch (e) {
-      res = false;
+      res["success"] = false;
+      res["data"] = null;
     }
     return res;
   }
@@ -120,6 +128,90 @@ class GetData {
       }
     } catch (e) {
       throw Exception('error $e');
+    }
+  }
+
+  Future<List> allSemester(String? idSantri) async {
+    String urlGet = '${Api.getSemester}/$idSantri';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<List> allPenilaian(String? idSantri, String? idSemt) async {
+    String urlGet = '${Api.getTimeline}/$idSantri/$idSemt';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<Santri?> checkUUID(String? uid) async {
+    String urlGet = '${Api.checkUUID}/$uid';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return Santri.fromMap(resp.data['data']);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Santri> updateUUID(String? idSantri, Map<String, dynamic> data) async {
+    String urlPost = '${Api.updateUUID}/$idSantri';
+    try {
+      Response resp = await dio.post(urlPost, data: json.encode(data));
+      if (resp.statusCode == 200) {
+        return Santri.fromMap(resp.data['data']);
+      } else {
+        throw Exception('error server');
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<List> allNotif(String? idSantri) async {
+    String urlGet = '${Api.getNotif}/$idSantri';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      throw Exception('error $e');
+    }
+  }
+
+  Future<List> headlinesBerita(double count) async {
+    String urlGet = '${Api.getHeadlines}/${count.toString()}';
+    try {
+      Response resp = await dio.get(urlGet);
+      if (resp.statusCode == 200) {
+        return resp.data['data'];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 }

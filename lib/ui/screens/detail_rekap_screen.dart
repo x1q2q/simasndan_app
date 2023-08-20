@@ -4,121 +4,153 @@ import '../components/def_appbar.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../../providers/models/rekaps.dart';
+import '../../providers/services/get_data.dart';
+import '../../core/api.dart';
 
 class DetailRekapScreen extends StatefulWidget {
-  const DetailRekapScreen({super.key, this.idRekap});
-  final String? idRekap;
+  const DetailRekapScreen(
+      {super.key,
+      this.idSantri,
+      this.idSemester,
+      this.semester,
+      this.thPelajaran});
+  final String? idSantri;
+  final String? idSemester;
+  final String? semester;
+  final String? thPelajaran;
+
   @override
   State<DetailRekapScreen> createState() => _DetailRekapScreenState();
 }
 
 class _DetailRekapScreenState extends State<DetailRekapScreen> {
-  final _longTxt =
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
-  final List<Rekaps> listOfRekaps = [
-    Rekaps(
-        tgl: "30/06/2023",
-        kode: "KLSSFNH",
-        guru: "Gus Baha",
-        deskripsi: "Santri telah hadir dan mendapatkan nilai 100"),
-    Rekaps(
-        tgl: "29/06/2023",
-        kode: "KLSSFNH",
-        guru: "Gus Baha",
-        deskripsi: "Santri telah hadir dan mendapatkan nilai 85"),
-    Rekaps(
-        tgl: "27/06/2023",
-        kode: "KLSSFNH",
-        guru: "Gus Baha",
-        deskripsi: "Santri telah hadir dan mendapatkan nilai 90"),
-  ];
+  final GetData getData = GetData();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  List? allPenilaian;
+  _getData() async {
+    allPenilaian =
+        await getData.allPenilaian(widget.idSantri, widget.idSemester);
+    _isLoading = false;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    var screenSizes = MediaQuery.of(context).size;
     return SafeArea(
         child: Scaffold(
             appBar: const DefAppBar(title: ""),
             backgroundColor: Colors.white,
-            body: SingleChildScrollView(
-                child: Column(children: <Widget>[
-              Container(
-                  padding: const EdgeInsets.all(25),
-                  child: const Row(
-                    children: <Widget>[
-                      Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text("Semester 2", style: Styles.headStyle),
-                          Text("Tahun Pelajaran 2022/2023",
-                              style: TextStyle(
-                                  color: orangev3,
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 16)),
-                        ],
-                      )),
-                      IconButton(
-                        iconSize: 70,
-                        icon: Icon(
-                          Icons.bookmark,
-                          color: orangev3,
-                        ),
-                        onPressed: null,
-                      )
-                    ],
-                  )),
-              Stack(children: [
-                Container(
-                    padding: const EdgeInsets.fromLTRB(25, 25, 25, 25),
-                    constraints: BoxConstraints(
-                        minHeight: screenSizes.height,
-                        minWidth: screenSizes.width,
-                        maxHeight: double.infinity),
-                    decoration: const BoxDecoration(
-                      color: orangev1,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                    ),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                              decoration: const BoxDecoration(
-                                  border: Border(
-                                      left: BorderSide(
-                                          color: orangev3, width: 3))),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 2.0, horizontal: 8.0),
-                              child: const Text("Tracking Progress Belajar",
-                                  style: Styles.labelTxtStyle2)),
-                          verticalSpaceSmall,
-                          ListView(
-                              shrinkWrap: true,
-                              physics: const ScrollPhysics(),
-                              children: <Widget>[
-                                _timelineTrack(context),
-                                _timelineTrack(context),
-                                _timelineTrack(context),
-                              ]),
-                        ]))
-              ]),
-            ]))));
+            body: RefreshIndicator(
+                key: _refreshIndicatorKey,
+                onRefresh: () async {
+                  _getData();
+                },
+                child: konten(context))));
   }
 
-  Widget _timelineTrack(BuildContext context) {
+  Widget konten(BuildContext context) {
+    var screenSizes = MediaQuery.of(context).size;
+    return _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 5,
+              color: greenv3,
+            ),
+          )
+        : ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+                Container(
+                    padding: const EdgeInsets.all(25),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text("Semester ${widget.semester}",
+                                style: Styles.headStyle),
+                            Text("Tahun Pelajaran ${widget.thPelajaran}",
+                                style: const TextStyle(
+                                    color: orangev3,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16)),
+                          ],
+                        )),
+                        const IconButton(
+                          iconSize: 70,
+                          icon: Icon(
+                            Icons.bookmark,
+                            color: orangev3,
+                          ),
+                          onPressed: null,
+                        )
+                      ],
+                    )),
+                Stack(children: [
+                  Container(
+                      padding: const EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      constraints: BoxConstraints(
+                          minHeight: screenSizes.height,
+                          minWidth: screenSizes.width,
+                          maxHeight: double.infinity),
+                      decoration: const BoxDecoration(
+                        color: orangev1,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                                decoration: const BoxDecoration(
+                                    border: Border(
+                                        left: BorderSide(
+                                            color: orangev3, width: 3))),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 2.0, horizontal: 8.0),
+                                child: const Text("Tracking Progress Belajar",
+                                    style: Styles.labelTxtStyle2)),
+                            verticalSpaceSmall,
+                            ListView.builder(
+                                itemCount: allPenilaian!.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemBuilder: (_, index) {
+                                  return _timelineTrack(
+                                      context,
+                                      allPenilaian![index]['materi'],
+                                      allPenilaian![index]['penilaian']);
+                                })
+                          ]))
+                ]),
+              ]);
+  }
+
+  Widget _timelineTrack(BuildContext context, String materi, List timeline) {
     var screenSizes = MediaQuery.of(context).size;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        verticalSpaceMedium,
-        const Text('KITAB SAFINATUN NAJAH', style: Styles.labelTxtStyle2),
+        verticalSpaceSmall,
+        Text(materi, style: Styles.labelTxtStyle2),
         ListView.builder(
             shrinkWrap: true,
-            physics: const ScrollPhysics(),
-            itemCount: listOfRekaps.length,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: timeline.length,
             itemBuilder: (context, i) {
+              var waktu = timeline[i]['waktu_mulai'].substring(0, 16);
               return Stack(
                 children: [
                   Container(
@@ -132,14 +164,14 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  '${listOfRekaps[i].tgl} - ${listOfRekaps[i].kode} - ${listOfRekaps[i].guru}',
+                                  '${waktu} - (${timeline[i]['presensi']}/${timeline[i]['nilai']}) - ${timeline[i]['nama_guru']}',
                                   style: const TextStyle(
                                       fontSize: 14,
                                       color: orangev3,
                                       fontStyle: FontStyle.italic,
                                       fontWeight: FontWeight.w400)),
                               Text(
-                                listOfRekaps[i].deskripsi,
+                                '-KEGIATAN: ${timeline[i]['kegiatan']}\n-DESKRIPSI: ${timeline[i]['deskripsi']}',
                                 style: const TextStyle(
                                     color: orangev3,
                                     fontSize: 14,
@@ -184,7 +216,7 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
               );
             }),
         verticalSpaceMedium,
-        const MySeparator(color: orangev3),
+        const MySeparator(color: orangev2),
       ],
     );
   }

@@ -73,6 +73,7 @@ class _MateriScreenState extends State<MateriScreen> {
                           border: Border(bottom: BorderSide(color: orangev3))),
                       padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
                               width: MediaQuery.of(context).size.width * 0.3,

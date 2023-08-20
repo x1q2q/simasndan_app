@@ -8,6 +8,11 @@ import 'detail_berita_screen.dart';
 import 'notifikasi_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../../core/messaging_service.dart';
+import '../../providers/services/get_data.dart';
+import '../../core/api.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, this.inputName}) : super(key: key);
@@ -18,10 +23,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GetData getData = GetData();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
+  bool _isLoading = true;
+
+  late final Box box;
+  final _messagingService = MessagingService();
+
   @override
   void initState() {
     super.initState();
     initializeDateFormatting();
+    box = Hive.box('user');
+    _messagingService.init(context);
+    _getData();
+  }
+
+  List? allBerita;
+  _getData() async {
+    allBerita = await getData.headlinesBerita(5);
+    _isLoading = false;
+    setState(() {});
   }
 
   String tglNow() {
@@ -33,8 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     var screenSizes = MediaQuery.of(context).size;
-    String nama = widget.inputName ?? '';
-    String greetingTxt = 'Assalamualaikum wr wb, $nama!';
+    String uname = box.get('username');
+    String uuid = box.get('uuid');
+    String idsantri = box.get('id');
+    String greetingTxt = 'Assalamualaikum, $uname!';
 
     return SafeArea(
         child: Scaffold(
@@ -76,8 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const NotifikasiScreen(
-                                                idSantri: '1',
+                                              NotifikasiScreen(
+                                                idSantri: idsantri,
                                               )))
                                 },
                               )
@@ -115,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Container(
                                     height: 40,
                                     width: 40,
-                                    child: const Icon(Icons.campaign,
+                                    child: const Icon(Icons.mosque,
                                         color: orangev3, size: 40),
                                   ),
                                 ),
@@ -136,9 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               topLeft: Radius.circular(30),
                               topRight: Radius.circular(30),
                             ),
+                            boxShadow: [Styles.boxCardShdStyle],
                           ),
                           child: GridView.count(
                             shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
                             crossAxisCount: 4,
                             children: <Widget>[
                               MenuButton(
@@ -167,7 +194,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const RekapScreen()))
+                                                    RekapScreen(
+                                                        idSantri: idsantri)))
                                       }),
                               MenuButton(
                                   btnTxt: "Profil",
@@ -178,8 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const ProfilScreen(
-                                                        idSantri: '1')))
+                                                    ProfilScreen(
+                                                        idSantri: idsantri)))
                                       })
                             ],
                           ))
@@ -191,8 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 0,
                   ),
                   Container(
-                      height: screenSizes.height,
-                      width: double.infinity,
+                      height: 700,
                       color: lightv1,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,19 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       vertical: 2.0, horizontal: 8.0),
                                   child: const Text("Headline",
                                       style: Styles.labelTxtStyle))),
-                          Flexible(
-                            child: ListView(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.vertical,
-                              children: <Widget>[
-                                _boxNews(context),
-                                _boxNews(context),
-                                _boxNews(context),
-                                _boxNews(context),
-                                _boxNews(context),
-                              ],
-                            ),
-                          )
+                          _boxNews(context)
                         ],
                       ))
                 ],
@@ -229,58 +244,75 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _boxNews(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      child: InkWell(
-          onTap: () => {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const DetailBeritaScreen(
-                              idBerita: '1',
-                            )))
-              },
-          splashColor: greenv1,
-          child: Container(
-            decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: greenv1))),
-            padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-            child: Row(
-              children: [
-                const Flexible(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pemberitahuan Santri Masuk ke pondok pesantren',
-                        maxLines: 2,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            fontFamily: 'Poppins',
-                            color: Colors.black87),
-                      ),
-                      Text(
-                        softWrap: true,
-                        maxLines: 2,
-                        'lorem ipsum dolor sit amet consecteur dolor sit amet banget uh juni plan plan pak sopirr. spontan uhuyy',
-                        style: TextStyle(fontSize: 13, color: Colors.black54),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(width: 10),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  child: Image.asset(
-                    "assets/images/luffyeeeh.jpg",
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ],
+    return _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 5,
+              color: greenv3,
             ),
-          )),
-    );
+          )
+        : ListView.builder(
+            itemCount: allBerita!.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (_, index) {
+              return Material(
+                color: Colors.white,
+                child: InkWell(
+                    onTap: () => {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DetailBeritaScreen(
+                                        idBerita:
+                                            allBerita![index]['id'].toString(),
+                                      )))
+                        },
+                    splashColor: greenv1,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(color: greenv1))),
+                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${allBerita![index]['judul']}",
+                                  maxLines: 2,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      fontFamily: 'Poppins',
+                                      color: Colors.black87),
+                                ),
+                                Text(
+                                  softWrap: true,
+                                  maxLines: 2,
+                                  "${allBerita![index]['isi']}",
+                                  style: const TextStyle(
+                                      fontSize: 13, color: Colors.black54),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            child: (allBerita![index]['media'] == null)
+                                ? Image.network(
+                                    "${Api.baseURL}/assets/img/no-image.png")
+                                : Image.network(
+                                    "${Api.baseURL}/assets/img/uploads/berita/${allBerita![index]['media']['nama']}"),
+                          ),
+                        ],
+                      ),
+                    )),
+              );
+            });
   }
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "463131478033",
+    "project_id": "simasndan-auth",
+    "storage_bucket": "simasndan-auth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:463131478033:android:7003ed0217e766b343c9b0",
+        "android_client_info": {
+          "package_name": "com.example.simasndan_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "463131478033-hdsa4lhimq2udn656868nb6sea02hdkn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZS1nM5xe0t6TC0sdQcfRUManxVI0AUsQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "463131478033-hdsa4lhimq2udn656868nb6sea02hdkn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
