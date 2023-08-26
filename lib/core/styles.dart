@@ -59,6 +59,11 @@ class Styles {
       blurRadius: 7,
       spreadRadius: 1,
       color: Colors.black12);
+  static const whiteStyle = TextStyle(
+      fontSize: 15,
+      color: Colors.white,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.bold);
 
   static const bodyStyle = TextStyle(
       fontFamily: 'Poppins', fontSize: 19, fontWeight: FontWeight.w600);

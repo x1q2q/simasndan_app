@@ -8,14 +8,14 @@ import 'dart:io';
 
 class GetData {
   Dio dio = Dio();
-  Future<Materi> detailMateri(String? idMateri) async {
+  Future<Materi?> detailMateri(String? idMateri) async {
     String urlGet = '${Api.getMateri}/$idMateri';
     try {
       Response resp = await dio.get(urlGet);
       if (resp.statusCode == 200) {
         return Materi.fromMap(resp.data['data']);
       } else {
-        throw Exception('error server');
+        return null;
       }
     } catch (e) {
       throw Exception('error $e');
@@ -36,14 +36,14 @@ class GetData {
     }
   }
 
-  Future<Santri> detailSantri(String? idSantri) async {
+  Future<Santri?> detailSantri(String? idSantri) async {
     String urlGet = '${Api.getSantri}/$idSantri';
     try {
       Response resp = await dio.get(urlGet);
       if (resp.statusCode == 200) {
         return Santri.fromMap(resp.data['data']);
       } else {
-        throw Exception('error server');
+        return null;
       }
     } catch (e) {
       throw Exception('error $e');
@@ -62,7 +62,6 @@ class GetData {
       Response resp = await dio.post('${Api.getSantri}/$id?_method=PUT',
           data: formData,
           options: Options(headers: {'Content-Type': 'multipart/form-data'}));
-      print(resp.toString());
       res = true;
     } catch (e) {
       res = false;
@@ -75,7 +74,6 @@ class GetData {
     Map<String, dynamic> res = {"success": bool, "data": Santri};
     try {
       Response resp = await dio.post(Api.login, data: json.encode(data));
-      print(resp.toString());
       if (resp.statusCode == 200) {
         res["success"] = true;
         res["data"] = Santri.fromMap(resp.data['data']);
@@ -96,7 +94,7 @@ class GetData {
       if (resp.statusCode == 200) {
         return resp.data['data'];
       } else {
-        throw Exception('error server');
+        return [];
       }
     } catch (e) {
       throw Exception('error $e');
@@ -110,21 +108,21 @@ class GetData {
       if (resp.statusCode == 200) {
         return resp.data['data'];
       } else {
-        throw Exception('error server');
+        return [];
       }
     } catch (e) {
       throw Exception('error $e');
     }
   }
 
-  Future<Berita> detailBerita(String? idBerita) async {
+  Future<Berita?> detailBerita(String? idBerita) async {
     String urlGet = '${Api.getBerita}/$idBerita';
     try {
       Response resp = await dio.get(urlGet);
       if (resp.statusCode == 200) {
         return Berita.fromMap(resp.data['data']);
       } else {
-        throw Exception('error server');
+        return null;
       }
     } catch (e) {
       throw Exception('error $e');
@@ -138,7 +136,7 @@ class GetData {
       if (resp.statusCode == 200) {
         return resp.data['data'];
       } else {
-        throw Exception('error server');
+        return [];
       }
     } catch (e) {
       throw Exception('error $e');
@@ -152,7 +150,7 @@ class GetData {
       if (resp.statusCode == 200) {
         return resp.data['data'];
       } else {
-        throw Exception('error server');
+        return [];
       }
     } catch (e) {
       throw Exception('error $e');
@@ -173,14 +171,15 @@ class GetData {
     }
   }
 
-  Future<Santri> updateUUID(String? idSantri, Map<String, dynamic> data) async {
+  Future<Santri?> updateUUID(
+      String? idSantri, Map<String, dynamic> data) async {
     String urlPost = '${Api.updateUUID}/$idSantri';
     try {
       Response resp = await dio.post(urlPost, data: json.encode(data));
       if (resp.statusCode == 200) {
         return Santri.fromMap(resp.data['data']);
       } else {
-        throw Exception('error server');
+        return null;
       }
     } catch (e) {
       throw Exception('error $e');
@@ -211,7 +210,7 @@ class GetData {
         return [];
       }
     } catch (e) {
-      return [];
+      throw Exception('error $e');
     }
   }
 }

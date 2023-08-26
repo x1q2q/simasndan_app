@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class Auth {
+class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
   final GoogleSignIn googleSignTautkan = GoogleSignIn(
@@ -75,7 +75,7 @@ class Auth {
         result["email"] = user!.email;
         result["uuid"] = user.uid;
       } catch (e) {
-        print('error $e');
+        return result;
       }
     }
     return result;

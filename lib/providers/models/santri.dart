@@ -1,6 +1,7 @@
 class Santri {
   String id;
   String username;
+  String jenisKelamin;
   String? email;
   String namaSantri;
   String tingkatan;
@@ -16,6 +17,7 @@ class Santri {
       {required this.id,
       this.email,
       required this.username,
+      required this.jenisKelamin,
       required this.namaSantri,
       required this.tingkatan,
       required this.tempatLahir,
@@ -30,6 +32,7 @@ class Santri {
         id: json['id'].toString(),
         email: json['email'],
         username: json['username'],
+        jenisKelamin: json['jenis_kelamin'],
         namaSantri: json['nama_santri'],
         tingkatan: json['tingkatan'],
         tempatLahir: json['tempat_lahir'],

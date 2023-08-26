@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:simasndan/ui/components/my_separator.dart';
 import '../components/def_appbar.dart';
+import '../components/my_button.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
-import '../../providers/models/rekaps.dart';
 import '../../providers/services/get_data.dart';
-import '../../core/api.dart';
+import '../components/skeleton.dart';
+import '../components/svg.dart';
 
 class DetailRekapScreen extends StatefulWidget {
   const DetailRekapScreen(
@@ -28,6 +29,7 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   bool _isLoading = true;
+  bool _isError = false;
 
   @override
   void initState() {
@@ -37,9 +39,17 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
 
   List? allPenilaian;
   _getData() async {
-    allPenilaian =
-        await getData.allPenilaian(widget.idSantri, widget.idSemester);
-    _isLoading = false;
+    _isLoading = true;
+    allPenilaian = await getData
+        .allPenilaian(widget.idSantri, widget.idSemester)
+        .catchError((e) {
+      _isLoading = false;
+      _isError = true;
+      return [];
+    }).then((value) {
+      _isLoading = false;
+      return value;
+    });
     setState(() {});
   }
 
@@ -52,90 +62,112 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
             body: RefreshIndicator(
                 key: _refreshIndicatorKey,
                 onRefresh: () async {
-                  _getData();
+                  setState(() {
+                    _getData();
+                  });
                 },
                 child: konten(context))));
   }
 
   Widget konten(BuildContext context) {
-    var screenSizes = MediaQuery.of(context).size;
     return _isLoading
-        ? const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 5,
-              color: greenv3,
-            ),
-          )
-        : ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
-                Container(
-                    padding: const EdgeInsets.all(25),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                            child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text("Semester ${widget.semester}",
-                                style: Styles.headStyle),
-                            Text("Tahun Pelajaran ${widget.thPelajaran}",
-                                style: const TextStyle(
-                                    color: orangev3,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 16)),
-                          ],
-                        )),
-                        const IconButton(
-                          iconSize: 70,
-                          icon: Icon(
-                            Icons.bookmark,
-                            color: orangev3,
-                          ),
-                          onPressed: null,
-                        )
-                      ],
-                    )),
-                Stack(children: [
-                  Container(
-                      padding: const EdgeInsets.fromLTRB(25, 25, 25, 25),
-                      constraints: BoxConstraints(
-                          minHeight: screenSizes.height,
-                          minWidth: screenSizes.width,
-                          maxHeight: double.infinity),
-                      decoration: const BoxDecoration(
-                        color: orangev1,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
-                      ),
+        ? Skeleton.shimmerDetailTimeline
+        : (allPenilaian!.isNotEmpty)
+            ? listKonten(context)
+            : ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  verticalSpaceLarge,
+                  verticalSpaceLarge,
+                  _isError == true ? Svg.imgErrorData : Svg.imgEmptyData,
+                  Center(
+                    child: MyButton(
+                      type: 'elevicon',
+                      icon: Icons.refresh,
+                      onTap: () async {
+                        setState(() {
+                          _getData();
+                        });
+                      },
+                      btnText: 'Refresh',
+                    ),
+                  ),
+                  verticalSpaceLarge
+                ],
+              );
+  }
+
+  Widget listKonten(BuildContext context) {
+    var screenSizes = MediaQuery.of(context).size;
+    return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: <Widget>[
+          Container(
+              padding: const EdgeInsets.all(25),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
                       child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                                decoration: const BoxDecoration(
-                                    border: Border(
-                                        left: BorderSide(
-                                            color: orangev3, width: 3))),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 2.0, horizontal: 8.0),
-                                child: const Text("Tracking Progress Belajar",
-                                    style: Styles.labelTxtStyle2)),
-                            verticalSpaceSmall,
-                            ListView.builder(
-                                itemCount: allPenilaian!.length,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (_, index) {
-                                  return _timelineTrack(
-                                      context,
-                                      allPenilaian![index]['materi'],
-                                      allPenilaian![index]['penilaian']);
-                                })
-                          ]))
-                ]),
-              ]);
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text("Semester ${widget.semester}",
+                          style: Styles.headStyle),
+                      Text("Tahun Pelajaran ${widget.thPelajaran}",
+                          style: const TextStyle(
+                              color: orangev3,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 16)),
+                    ],
+                  )),
+                  const IconButton(
+                    iconSize: 70,
+                    icon: Icon(
+                      Icons.bookmark,
+                      color: orangev3,
+                    ),
+                    onPressed: null,
+                  )
+                ],
+              )),
+          Stack(children: [
+            Container(
+                padding: const EdgeInsets.fromLTRB(25, 25, 25, 25),
+                constraints: BoxConstraints(
+                    minHeight: screenSizes.height,
+                    minWidth: screenSizes.width,
+                    maxHeight: double.infinity),
+                decoration: const BoxDecoration(
+                  color: orangev1,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                          decoration: const BoxDecoration(
+                              border: Border(
+                                  left: BorderSide(color: orangev3, width: 3))),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 2.0, horizontal: 8.0),
+                          child: const Text("Tracking Progress Belajar",
+                              style: Styles.labelTxtStyle2)),
+                      verticalSpaceSmall,
+                      ListView.builder(
+                          itemCount: allPenilaian!.length,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemBuilder: (_, index) {
+                            return _timelineTrack(
+                                context,
+                                allPenilaian![index]['materi'],
+                                allPenilaian![index]['penilaian']);
+                          })
+                    ]))
+          ]),
+        ]);
   }
 
   Widget _timelineTrack(BuildContext context, String materi, List timeline) {
