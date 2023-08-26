@@ -7,10 +7,14 @@ import 'edit_profil_screen.dart';
 import '../../core/api.dart';
 import '../../providers/models/santri.dart';
 import '../../providers/services/get_data.dart';
-import '../../core/auth.dart';
+import '../../providers/services/auth_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../core/messaging_service.dart';
+import '../../providers/services/messaging_service.dart';
+import '../components/skeleton.dart';
+import 'package:bot_toast/bot_toast.dart';
+import '../../providers/services/general_service.dart';
+import '../components/svg.dart';
 
 class ProfilScreen extends StatefulWidget {
   final String? idSantri;
@@ -25,6 +29,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   bool _isLoading = true;
+  bool _isError = false;
   late final Box box;
   final _messagingService = MessagingService();
   String? fcmToken;
@@ -38,9 +43,16 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   Santri? dtSantri;
   _getData() async {
-    dtSantri = await getData.detailSantri(widget.idSantri);
-    fcmToken = await _messagingService.getDeviceToken();
-    _isLoading = false;
+    _isLoading = true;
+    dtSantri = await getData.detailSantri(widget.idSantri).catchError((e) {
+      _isLoading = false;
+      _isError = true;
+      return null;
+    }).then((value) async {
+      _isLoading = false;
+      fcmToken = await _messagingService.getDeviceToken();
+      return value;
+    });
     setState(() {});
   }
 
@@ -53,40 +65,64 @@ class _ProfilScreenState extends State<ProfilScreen> {
             body: RefreshIndicator(
                 key: _refreshIndicatorKey,
                 onRefresh: () async {
-                  _getData();
+                  setState(() {
+                    _getData();
+                  });
                 },
                 child: konten(context))));
   }
 
   Widget konten(BuildContext ctx) {
+    return _isLoading
+        ? Skeleton.shimmerProfil
+        : (dtSantri != null)
+            ? listKonten(context)
+            : ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  verticalSpaceLarge,
+                  verticalSpaceLarge,
+                  _isError == true ? Svg.imgErrorData : Svg.imgEmptyData,
+                  Center(
+                    child: MyButton(
+                      type: 'elevicon',
+                      icon: Icons.refresh,
+                      onTap: () async {
+                        setState(() {
+                          _getData();
+                        });
+                      },
+                      btnText: 'Refresh',
+                    ),
+                  ),
+                  verticalSpaceLarge
+                ],
+              );
+  }
+
+  Widget listKonten(BuildContext ctx) {
     bool checkIsNoValidEmail(String? email) {
       return (email == null || email == '-' || email == '');
     }
 
-    var screenSizes = MediaQuery.of(context).size;
     String sttsSantri(dynamic stts) {
       return (stts) ? 'Pengurus' : 'Santri Biasa';
     }
 
-    bool checkisNoValidImage(dynamic foto) {
-      return (foto == null || foto == '-' || foto == '');
-    }
-
-    return _isLoading
-        ? const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 5,
-              color: greenv3,
-            ),
-          )
-        : SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 40),
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-              CircleAvatar(
-                backgroundColor: orangev2,
-                radius: 70,
-                child: Container(
+    return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          CircleAvatar(
+            backgroundColor: orangev2,
+            radius: 70,
+            child: GeneralService().checkisNoValidImage(dtSantri!.foto)
+                ? Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: dtSantri!.jenisKelamin == 'perempuan'
+                        ? Svg.imgFemaleProfile
+                        : Svg.imgMaleProfile)
+                : Container(
                     height: 120,
                     width: 120,
                     decoration: BoxDecoration(
@@ -95,98 +131,106 @@ class _ProfilScreenState extends State<ProfilScreen> {
                         image: DecorationImage(
                             alignment: Alignment.center,
                             fit: BoxFit.cover,
-                            image: (checkisNoValidImage(dtSantri!.foto))
-                                ? const NetworkImage(
-                                    "${Api.baseURL}/assets/img/no-image.png")
-                                : NetworkImage(
-                                    "${Api.baseURL}/assets/img/uploads/santri/${dtSantri!.foto}")))),
-              ),
-              verticalSpaceSmall,
-              Center(
-                  child:
-                      Text('@${dtSantri!.username}', style: Styles.headStyle)),
-              verticalSpaceSmall,
-              Center(
-                  child: MyButton(
-                type: 'elevicon',
-                icon: Icons.edit,
-                onTap: () => {
-                  Navigator.push(
+                            image: NetworkImage(
+                                "${Api.baseURL}/public/assets/img/uploads/santri/${dtSantri!.foto}")))),
+          ),
+          verticalSpaceSmall,
+          Center(
+              child: Text('@${dtSantri!.username}', style: Styles.headStyle)),
+          verticalSpaceSmall,
+          Center(
+              child: MyButton(
+            type: 'elevicon',
+            icon: Icons.edit,
+            onTap: () => {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => EditProfilScreen(
+                            idSantri: dtSantri!.id,
+                          )))
+            },
+            btnText: 'Edit Profil',
+          )),
+          Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: Column(
+                children: <Widget>[
+                  _boxField(context, 'Nama', dtSantri!.namaSantri),
+                  _boxField(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => EditProfilScreen(
-                                idSantri: dtSantri!.id,
-                              )))
-                },
-                btnText: 'Edit Profil',
+                      'Email',
+                      checkIsNoValidEmail(dtSantri!.email)
+                          ? '-'
+                          : dtSantri!.email),
+                  _boxField(context, 'Tingkatan', dtSantri!.tingkatan),
+                  _boxField(
+                      context, 'Status', sttsSantri(dtSantri!.isPengurus)),
+                  _boxField(context, 'TTL',
+                      '${dtSantri!.tempatLahir}, ${dtSantri!.tglLahir ?? '-'}'),
+                  _boxField(context, 'Pendidikan', dtSantri!.universitas),
+                  _boxField(context, 'Alamat', dtSantri!.alamat),
+                ],
               )),
-              Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 30),
-                  child: Column(
-                    children: <Widget>[
-                      _boxField(context, 'Nama', dtSantri!.namaSantri),
-                      _boxField(
-                          context,
-                          'Email',
-                          checkIsNoValidEmail(dtSantri!.email)
-                              ? '-'
-                              : dtSantri!.email),
-                      _boxField(context, 'Tingkatan', dtSantri!.tingkatan),
-                      _boxField(
-                          context, 'Status', sttsSantri(dtSantri!.isPengurus)),
-                      _boxField(context, 'TTL',
-                          '${dtSantri!.tempatLahir}, ${dtSantri!.tglLahir ?? '-'}'),
-                      _boxField(context, 'Pendidikan', dtSantri!.universitas),
-                      _boxField(context, 'Alamat', dtSantri!.alamat),
-                    ],
-                  )),
-              Center(
-                  child: MyButton(
-                type: 'outline',
-                onTap: () async {
-                  if (checkIsNoValidEmail(dtSantri!.email)) {
-                    setState(() {
-                      _handleTautkan(context);
-                    });
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                            'anda sudah menautkan email anda, harap hubungi pengurus untuk mengganti!')));
-                  }
-                },
-                btnText: 'Tautkan akun Google',
-              )),
-              verticalSpaceSmall,
-              Center(
-                  child: MyButton(
-                type: 'outlineicon',
-                icon: Icons.logout,
-                onTap: () => {_keluar()},
-                btnText: 'Keluar',
-              )),
-            ]));
+          Center(
+              child: MyButton(
+            type: 'outline',
+            onTap: () async {
+              if (checkIsNoValidEmail(dtSantri!.email)) {
+                setState(() {
+                  _handleTautkan(context);
+                });
+              } else {
+                GeneralService().showNotifTitle("Tautkan akun Google",
+                    'anda sudah menautkan email anda, harap hubungi pengurus untuk mengganti!');
+              }
+            },
+            btnText: 'Tautkan akun Google',
+          )),
+          verticalSpaceSmall,
+          Center(
+              child: MyButton(
+            type: 'outlineicon',
+            icon: Icons.logout,
+            onTap: () => {_keluar()},
+            btnText: 'Keluar',
+          )),
+        ]));
   }
 
   void _handleTautkan(BuildContext ctx) async {
     try {
-      Map<String, dynamic> resTautan = await Auth().tautkanGoogle();
+      Map<String, dynamic> resTautan = await AuthService().tautkanGoogle();
       resTautan["fcm_token"] = fcmToken ?? '-';
-      Santri santri = await GetData().updateUUID(widget.idSantri, resTautan);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Berhasil menautkan akun ${santri.namaSantri}')));
+      Santri? santri = await GetData().updateUUID(widget.idSantri, resTautan);
+      if (resTautan["uuid"] != null && resTautan["email"] != null) {
+        GeneralService()
+            .showNotif(true, 'Anda berhasil menautkan akun ${santri!.email}');
+        GeneralService().checkPermission('notifikasi');
+        await _getData();
+      } else {
+        GeneralService()
+            .showNotif(false, 'Silakan pilih akun untuk ditautkan!');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Gagal menautkan akun!')));
+      GeneralService().showNotif(false, 'Anda gagal menautkan akun!');
     }
   }
 
   void _keluar() async {
-    await Auth().signOut();
+    var loader = BotToast.showLoading();
+    await AuthService().signOut();
     await box.delete('id');
     await box.delete('uuid');
     await box.delete('username');
-    Navigator.pushNamedAndRemoveUntil(
-        context, '/login-screen', (route) => false);
+    await box.delete('kab');
+    await box.delete('location');
+    await box.delete('full_location');
+    Future.delayed(Duration(seconds: 1), () async {
+      loader();
+      await Navigator.pushNamedAndRemoveUntil(
+          context, '/login-screen', (route) => false);
+    });
   }
 
   Widget _boxField(BuildContext context, String txt1, String? txt2) {

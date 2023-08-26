@@ -4,13 +4,16 @@ import '../components/def_appbar.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../components/my_button.dart';
-import '../components/base_alert.dart';
 import '../components/profil_text_field.dart';
 import '../../core/api.dart';
 import '../../providers/models/santri.dart';
 import '../../providers/services/get_data.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../ui/components/menu_button.dart';
+import '../components/skeleton.dart';
+import 'package:bot_toast/bot_toast.dart';
+import '../../providers/services/general_service.dart';
+import '../components/svg.dart';
 
 class EditProfilScreen extends StatefulWidget {
   final String? idSantri;
@@ -31,6 +34,7 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
   bool _isLoading = true;
+  bool _isError = false;
   bool btnPhotoPressed = false;
 
   XFile? image;
@@ -55,13 +59,23 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
 
   Santri? dtSantri;
   _getData() async {
-    dtSantri = await getData.detailSantri(widget.idSantri);
-    namaCtrl.text = dtSantri!.namaSantri;
-    tmptLahirCtrl.text = dtSantri!.tempatLahir;
-    tglLahirCtrl.text = dtSantri!.tglLahir ?? '';
-    univCtrl.text = dtSantri!.universitas;
-    alamatCtrl.text = dtSantri!.alamat;
-    _isLoading = false;
+    _isLoading = true;
+    dtSantri = await getData.detailSantri(widget.idSantri).catchError((e) {
+      _isLoading = false;
+      _isError = true;
+      return null;
+    }).then((value) {
+      if (value != null) {
+        namaCtrl.text = value.namaSantri;
+        tmptLahirCtrl.text = value.tempatLahir;
+        tglLahirCtrl.text = value.tglLahir ?? '';
+        univCtrl.text = value.universitas;
+        alamatCtrl.text = value.alamat;
+      }
+      _isLoading = false;
+      return value;
+    });
+
     setState(() {});
   }
 
@@ -115,49 +129,68 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
             body: RefreshIndicator(
                 key: _refreshIndicatorKey,
                 onRefresh: () async {
-                  _getData();
+                  setState(() {
+                    _getData();
+                  });
                 },
                 child: konten(context))));
   }
 
   Widget konten(BuildContext ctx) {
-    bool checkisNoValidImage(dynamic foto) {
-      return (foto == null || foto == '-' || foto == '');
-    }
-
-    ImageProvider<Object> chooseImage(dynamic foto) {
-      return (checkisNoValidImage(foto))
-          ? const NetworkImage("${Api.baseURL}/assets/img/no-image.png")
-          : NetworkImage("${Api.baseURL}/assets/img/uploads/santri/${foto}");
-    }
-
     return _isLoading
-        ? const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 5,
-              color: greenv3,
-            ),
-          )
-        : SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 40),
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-              Stack(
-                alignment: Alignment.center,
+        ? Skeleton.shimmerProfil
+        : (dtSantri != null)
+            ? listKonten(context)
+            : ListView(
+                shrinkWrap: true,
                 children: <Widget>[
-                  CircleAvatar(
-                    backgroundColor: orangev2,
-                    radius: 70,
-                    child: (btnPhotoPressed && image != null)
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Image.file(
-                              File(image!.path),
-                              fit: BoxFit.cover,
-                              height: 120,
-                              width: 120,
-                            ),
-                          )
+                  verticalSpaceLarge,
+                  verticalSpaceLarge,
+                  _isError == true ? Svg.imgErrorData : Svg.imgEmptyData,
+                  Center(
+                    child: MyButton(
+                      type: 'elevicon',
+                      icon: Icons.refresh,
+                      onTap: () async {
+                        setState(() {
+                          _getData();
+                        });
+                      },
+                      btnText: 'Refresh',
+                    ),
+                  ),
+                  verticalSpaceLarge
+                ],
+              );
+  }
+
+  Widget listKonten(BuildContext ctx) {
+    return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              CircleAvatar(
+                backgroundColor: orangev2,
+                radius: 70,
+                child: (btnPhotoPressed && image != null)
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Image.file(
+                          File(image!.path),
+                          fit: BoxFit.cover,
+                          height: 120,
+                          width: 120,
+                        ),
+                      )
+                    : GeneralService().checkisNoValidImage(dtSantri!.foto)
+                        ? Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: dtSantri!.jenisKelamin == 'perempuan'
+                                ? Svg.imgFemaleProfile
+                                : Svg.imgMaleProfile)
                         : Container(
                             height: 120,
                             width: 120,
@@ -167,47 +200,45 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
                                 image: DecorationImage(
                                     alignment: Alignment.center,
                                     fit: BoxFit.cover,
-                                    image: chooseImage(dtSantri!.foto)))),
-                  ),
-                  Positioned(
-                      bottom: 0,
-                      right: 0,
-                      left: 80,
-                      child: CircleAvatar(
-                          backgroundColor: greenv2,
-                          child: IconButton(
-                              iconSize: 25,
-                              color: Colors.white,
-                              icon: const Icon(Icons.photo_camera),
-                              onPressed: () {
-                                myAlert();
-                              }))),
-                ],
+                                    image: NetworkImage(
+                                        "${Api.baseURL}/public/assets/img/uploads/santri/${dtSantri!.foto}")))),
               ),
-              verticalSpaceXSmall,
-              Center(
-                  child:
-                      Text('@${dtSantri!.username}', style: Styles.headStyle)),
-              verticalSpaceSmall,
-              _fieldInput(context, "Nama", "", namaCtrl, false, false),
-              _fieldInput(
-                  context, "Tempat Lahir", "", tmptLahirCtrl, false, false),
-              _fieldInput(
-                  context, "Tanggal Lahir", "", tglLahirCtrl, false, true),
-              _fieldInput(context, "Pendidikan", "", univCtrl, false, false),
-              _fieldInput(context, "Alamat", "", alamatCtrl, true, false),
-              verticalSpaceSmall,
-              Center(
-                  child: MyButton(
-                type: 'elevicon',
-                icon: Icons.save,
-                onTap: () async => {_saveData(context, dtSantri!)},
-                btnText: 'Simpan',
-              )),
-            ]));
+              Positioned(
+                  bottom: 0,
+                  right: 0,
+                  left: 80,
+                  child: CircleAvatar(
+                      backgroundColor: greenv2,
+                      child: IconButton(
+                          iconSize: 25,
+                          color: Colors.white,
+                          icon: const Icon(Icons.photo_camera),
+                          onPressed: () {
+                            myAlert();
+                          }))),
+            ],
+          ),
+          verticalSpaceXSmall,
+          Center(
+              child: Text('@${dtSantri!.username}', style: Styles.headStyle)),
+          verticalSpaceSmall,
+          _fieldInput(context, "Nama", "", namaCtrl, false, false),
+          _fieldInput(context, "Tempat Lahir", "", tmptLahirCtrl, false, false),
+          _fieldInput(context, "Tanggal Lahir", "", tglLahirCtrl, false, true),
+          _fieldInput(context, "Pendidikan", "", univCtrl, false, false),
+          _fieldInput(context, "Alamat", "", alamatCtrl, true, false),
+          verticalSpaceSmall,
+          Center(
+              child: MyButton(
+            type: 'elevicon',
+            icon: Icons.save,
+            onTap: () async => {_saveData(context, dtSantri!)},
+            btnText: 'Simpan',
+          )),
+        ]));
   }
 
-  Widget _fieldInput(BuildContext context, String label, String hint,
+  Widget _fieldInput(BuildContext context, String? label, String hint,
       TextEditingController ctrlr, bool isTxtArea, bool isInputDate) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -215,7 +246,7 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              label,
+              label!,
               style: Styles.labelTxtStyle,
             ),
             verticalSpaceXSmall,
@@ -231,9 +262,11 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
 
   void _saveData(BuildContext ctx, Santri newSantri) async {
     bool resSubmit;
+    var loader = BotToast.showLoading();
     Map<String, dynamic> dataField = {
       'id': newSantri.id,
       'username': newSantri.username,
+      'jenis_kelamin': newSantri.jenisKelamin,
       'nama_santri': namaCtrl.text,
       'tingkatan': newSantri.tingkatan,
       'tempat_lahir': tmptLahirCtrl.text,
@@ -245,23 +278,14 @@ class _EditProfilScreenState extends State<EditProfilScreen> {
     final dtSantri = Santri.fromMap(dataField);
     String idSantri = dataField['id'];
     resSubmit = await getData.updateProfil(dtSantri, idSantri, filePhoto);
+    loader();
     if (resSubmit) {
-      _showMsg(ctx, true, "Sukses memperbarui profil!");
+      GeneralService()
+          .showNotif(true, "Anda telah berhasil memperbarui profil!");
+      Navigator.of(ctx).popAndPushNamed("/home-screen");
     } else {
-      _showMsg(ctx, false, "Gagal memperbarui profil!");
+      GeneralService().showNotif(
+          false, "Anda gagal memperbarui profil. Silakan ulangi lagi!");
     }
-  }
-
-  _showMsg(BuildContext ctx, bool isSukses, String msg) async {
-    await showDialog(
-        context: ctx,
-        builder: (BuildContext context) {
-          return BaseAlert(
-            bgColor: (isSukses) ? lightv2 : orangev2,
-            title: (isSukses) ? 'Berhasil!' : 'Error!',
-            msg: msg,
-            onTap: () => {Navigator.of(context).pushNamed("/home-screen")},
-          );
-        });
   }
 }

@@ -3,13 +3,16 @@ import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../components/my_text_field.dart';
 import '../components/my_button.dart';
-import '../components/base_alert.dart';
 import '../../providers/services/get_data.dart';
-import '../../core/auth.dart';
+import '../../providers/services/auth_service.dart';
 import '../../providers/models/santri.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:bot_toast/bot_toast.dart';
+import '../../providers/services/messaging_service.dart';
+import '../../providers/services/general_service.dart';
+import '../components/svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   final GetData getData = GetData();
   late final Box box;
+  final _messagingService = MessagingService();
 
   @override
   void initState() {
@@ -33,19 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     var screenSizes = MediaQuery.of(context).size;
-
-    _checkNama(BuildContext ctx) async {
-      await showDialog(
-          context: ctx,
-          builder: (BuildContext context) {
-            return BaseAlert(
-              bgColor: orangev1,
-              title: "Peringatan!",
-              msg: "Username atau password masih kosong!",
-              onTap: () => Navigator.pop(context),
-            );
-          });
-    }
 
     return SafeArea(
         child: GestureDetector(
@@ -64,22 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
               CircleAvatar(
                 backgroundColor: orangev2,
                 radius: 90,
-                child: Container(
-                    height: 120,
-                    width: 120,
-                    decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            alignment: Alignment.center,
-                            fit: BoxFit.fill,
-                            image:
-                                AssetImage('assets/images/logo_pondok.png')))),
+                child: Padding(
+                    padding: EdgeInsets.all(15), child: Svg.imgLogoPondok),
               ),
               verticalSpaceXSmall,
               const Text(
                 "Simasndan Apps",
                 style: Styles.headStyle,
               ),
-              verticalSpaceLarge,
+              verticalSpaceMedium,
               Stack(
                 children: [
                   Container(
@@ -119,11 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               verticalSpaceXSmall,
                               MyTextField(
-                                controller: passwordController,
-                                hintText: "**************",
-                                obscureText: true,
-                                icon: const Icon(Icons.remove_red_eye_sharp),
-                              ),
+                                  controller: passwordController,
+                                  hintText: "**************",
+                                  obscureText: true,
+                                  icon: Icon(Icons.visibility)),
                               verticalSpaceXSmall,
                               Row(
                                 children: [
@@ -148,7 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 type: 'elevicon',
                                 icon: Icons.login,
                                 onTap: () async => {
-                                  _submit(context, usernameController.text,
+                                  checkFieldLogin(
+                                      context,
+                                      usernameController.text,
                                       passwordController.text)
                                 },
                                 btnText: 'Masuk',
@@ -181,65 +166,81 @@ class _LoginScreenState extends State<LoginScreen> {
     if (await canLaunchUrl(Uri.parse(urlWaPengurus))) {
       await launchUrl(Uri.parse(urlWaPengurus));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Whatsapp tidak terinstall")));
+      await GeneralService().showNotif(false, "Whatsapp tidak terinstall");
     }
   }
 
   void _signInGoogle(BuildContext ctx) async {
-    bool resSubmit;
+    bool resSubmit = false;
 
-    resSubmit = await Auth().signInWithGoogle();
+    resSubmit = await AuthService().signInWithGoogle();
     if (resSubmit) {
-      String uuid = await Auth().getUUID();
+      String uuid = await AuthService().getUUID();
       Santri? santriLogin = await GetData().checkUUID(uuid);
       if (santriLogin != null) {
+        String? fcmToken = await _messagingService.getDeviceToken();
+        Map<String, dynamic> resTautan = {
+          "uuid": null,
+          "email": null,
+          "fcm_token": fcmToken ?? '-'
+        };
+        await GetData().updateUUID(santriLogin.id, resTautan);
+
+        await box.put('id', santriLogin.id);
+        await box.put('uuid', santriLogin.uuid);
+        await box.put('username', santriLogin.username);
         Navigator.of(ctx).popAndPushNamed("/home-screen");
-        await box.put('id', santriLogin!.id);
-        await box.put('uuid', santriLogin!.uuid);
-        await box.put('username', santriLogin!.username);
-        await _showMsg(
-            ctx, true, "Anda sukses login ${santriLogin!.namaSantri}!");
+        await GeneralService().showNotif(true,
+            "Selamat datang, ${santriLogin.namaSantri}. Akun anda berhasil login !");
       } else {
-        await Auth().signOut();
-        await _showMsg(ctx, false, "Gagal login. User belum ditautkan");
+        await AuthService().signOut();
+
+        await GeneralService().showNotif(
+            false, "Anda gagal login, akun google tidak terdaftar pada data");
       }
     } else {
-      await _showMsg(ctx, false, "Gagal login. User tidak ditemukan!");
+      await GeneralService()
+          .showNotif(false, "Anda gagal login, akun tidak ditemukan!");
     }
   }
 
-  void _submit(BuildContext ctx, String username, String password) async {
-    print('submit');
+  void checkFieldLogin(
+      BuildContext ctx, String username, String password) async {
+    if (username.isNotEmpty && password.isNotEmpty) {
+      submitCredential(ctx, username, password);
+    } else {
+      if (username.isEmpty) {
+        GeneralService().showNotif(false, "Username masih kosong");
+      } else if (password.isEmpty) {
+        GeneralService().showNotif(false, "Password masih kosong");
+      } else {
+        GeneralService().showNotif(false, "Username dan password masih kosong");
+      }
+    }
+  }
+
+  void submitCredential(
+      BuildContext ctx, String username, String password) async {
+    var loader = BotToast.showLoading();
     Map<String, dynamic> resSubmit = {"success": bool, "data": Santri};
     Map<String, dynamic> dataField = {
       'username': username,
       'password': password
     };
     resSubmit = await getData.login(dataField);
+    loader();
     if (resSubmit["success"]) {
       Santri santriLogin = resSubmit["data"];
       await box.put('id', santriLogin.id);
       await box.put('uuid', santriLogin.uuid ?? '-');
       await box.put('username', santriLogin.username);
+
       Navigator.of(ctx).popAndPushNamed("/home-screen");
-
-      await _showMsg(ctx, true, "Anda sukses login ${santriLogin.namaSantri}!");
+      await GeneralService().showNotif(true,
+          "Selamat datang, ${santriLogin.namaSantri}. Akun anda berhasil login !");
     } else {
-      await _showMsg(ctx, false, "Gagal login. User tidak ditemukan!");
+      await GeneralService()
+          .showNotif(false, "Anda Gagal login. User tidak ditemukan!");
     }
-  }
-
-  _showMsg(BuildContext ctx, bool isSukses, String msg) async {
-    await showDialog(
-        context: ctx,
-        builder: (BuildContext context) {
-          return BaseAlert(
-            bgColor: (isSukses) ? lightv2 : orangev2,
-            title: (isSukses) ? 'Berhasil!' : 'Error!',
-            msg: msg,
-            onTap: () => {Navigator.of(context).pop()},
-          );
-        });
   }
 }

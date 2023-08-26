@@ -8,7 +8,7 @@ import 'ui/screens/notifikasi_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'core/firebase_options.dart';
-import 'package:overlay_support/overlay_support.dart';
+import 'package:bot_toast/bot_toast.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,8 +48,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return OverlaySupport(
-        child: MaterialApp(
+    return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -59,6 +58,8 @@ class _MainAppState extends State<MainApp> {
         ),
       ),
       debugShowCheckedModeBanner: false,
+      builder: BotToastInit(),
+      navigatorObservers: [BotToastNavigatorObserver()],
       home: (islogin) ? const HomeScreen() : const LoginScreen(),
       routes: {
         '/login-screen': (context) => const LoginScreen(),
@@ -67,7 +68,7 @@ class _MainAppState extends State<MainApp> {
         '/materi-screen': (context) => const MateriScreen(),
         '/notifikasi-screen': (context) => const NotifikasiScreen()
       },
-    ));
+    );
   }
 }
 
