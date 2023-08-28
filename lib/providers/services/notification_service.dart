@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 // import 'package:timezone/data/latest_all.dart' as timezone;
 // import 'package:timezone/timezone.dart' as timezone;
 
@@ -47,18 +48,25 @@ class NotificationService {
 
     final int idNotification = data["id"] != null ? int.parse(data["id"]) : 1;
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-      'high_importance_channel',
-      'High Importance Notifications',
-      channelDescription: 'channel description',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
+        'high_importance_channel', 'High Importance Notifications',
+        channelDescription: 'Ini notifikasi penting simasndan apps',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker',
+        fullScreenIntent: true,
+        color: Colors.green,
+        enableLights: true,
+        ledColor: Colors.blue,
+        ledOnMs: 2000,
+        ledOffMs: 1000,
+        visibility: NotificationVisibility.public);
     var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
     );
     await _notification.show(
-        idNotification, judul, pesan, platformChannelSpecifics);
+        idNotification, judul, pesan, platformChannelSpecifics,
+        payload: 'Simasndan Notifikasi');
   }
 }
