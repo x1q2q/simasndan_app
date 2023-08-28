@@ -13,6 +13,7 @@ import 'package:bot_toast/bot_toast.dart';
 import '../../providers/services/messaging_service.dart';
 import '../../providers/services/general_service.dart';
 import '../components/svg.dart';
+import '../../core/custom.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -162,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _kontakPengurus() async {
     var urlWaPengurus =
-        "whatsapp://send?phone=6285714186920&text=Permisi kak, mohon untuk bantu reset password atas nama ...";
+        "whatsapp://send?phone=${Custom.noWaPengurus}&text=${Custom.msgWaPengurus}";
     if (await canLaunchUrl(Uri.parse(urlWaPengurus))) {
       await launchUrl(Uri.parse(urlWaPengurus));
     } else {

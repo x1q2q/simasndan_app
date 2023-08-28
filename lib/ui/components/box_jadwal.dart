@@ -46,6 +46,12 @@ class BoxJadwal extends StatelessWidget {
                       ),
                     );
                   }),
+              verticalSpaceSmall,
+              const Divider(
+                color: Colors.white,
+                thickness: 2,
+                height: 0,
+              ),
               Container(
                   padding: const EdgeInsets.all(10),
                   child: Text.rich(TextSpan(

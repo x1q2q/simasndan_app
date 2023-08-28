@@ -221,9 +221,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   : _isErrorLoadAdhan
                                                       ? const BoxJadwal(
                                                           tglNow:
-                                                              "jadwal tidak diketahui",
+                                                              "Jadwal tidak diketahui",
                                                           fullLoc:
-                                                              "lokasi tidak ditemukan",
+                                                              "Lokasi tidak ditemukan. Harap refresh halaman terlebih dahulu!",
                                                           dataJadwal: [],
                                                         )
                                                       : BoxJadwal(
