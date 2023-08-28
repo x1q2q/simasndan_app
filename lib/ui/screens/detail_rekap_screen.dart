@@ -152,7 +152,7 @@ class _DetailRekapScreenState extends State<DetailRekapScreen> {
                                   left: BorderSide(color: orangev3, width: 3))),
                           padding: const EdgeInsets.symmetric(
                               vertical: 2.0, horizontal: 8.0),
-                          child: const Text("Tracking Progress Belajar",
+                          child: const Text("Timeline Rekap Belajar",
                               style: Styles.labelTxtStyle2)),
                       verticalSpaceSmall,
                       ListView.builder(

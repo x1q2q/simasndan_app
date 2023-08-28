@@ -53,17 +53,17 @@ class _LoginScreenState extends State<LoginScreen> {
               verticalSpaceLarge,
               verticalSpaceLarge,
               CircleAvatar(
-                backgroundColor: orangev2,
-                radius: 90,
+                backgroundColor: orangev1,
+                radius: 100,
                 child: Padding(
-                    padding: EdgeInsets.all(15), child: Svg.imgLogoPondok),
+                    padding: EdgeInsets.all(20), child: Svg.imgLogoPondok),
               ),
               verticalSpaceXSmall,
               const Text(
                 "Simasndan Apps",
                 style: Styles.headStyle,
               ),
-              verticalSpaceMedium,
+              verticalSpaceSmall,
               Stack(
                 children: [
                   Container(
@@ -200,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } else {
       await GeneralService()
-          .showNotif(false, "Anda gagal login, akun tidak ditemukan!");
+          .showNotif(false, "Silakan pilih akun google terdaftar untuk masuk!");
     }
   }
 

@@ -219,6 +219,13 @@ class _ProfilScreenState extends State<ProfilScreen> {
 
   void _keluar() async {
     var loader = BotToast.showLoading();
+    Map<String, dynamic> resTautan = {
+      "uuid": null,
+      "email": null,
+      "fcm_token": null
+    };
+    await GetData().updateUUID(widget.idSantri, resTautan);
+
     await AuthService().signOut();
     await box.delete('id');
     await box.delete('uuid');
@@ -226,7 +233,8 @@ class _ProfilScreenState extends State<ProfilScreen> {
     await box.delete('kab');
     await box.delete('location');
     await box.delete('full_location');
-    Future.delayed(Duration(seconds: 1), () async {
+
+    Future.delayed(Duration(seconds: 2), () async {
       loader();
       await Navigator.pushNamedAndRemoveUntil(
           context, '/login-screen', (route) => false);
