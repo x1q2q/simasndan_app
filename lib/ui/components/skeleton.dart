@@ -7,13 +7,13 @@ enum KategoriFilter { artikel, pengumuman, jadwal }
 class Skeleton {
   static Widget shimmerAdhan = Shimmer.fromColors(
       baseColor: Colors.grey.shade400,
-      highlightColor: Colors.grey.shade200,
+      highlightColor: Colors.grey.shade100,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             width: 160,
-            height: 23,
+            height: 22,
             decoration: ShapeDecoration(
                 color: Colors.grey[200]!,
                 shape: const RoundedRectangleBorder(
@@ -32,8 +32,8 @@ class Skeleton {
       ));
 
   static Widget shimmerNews = Shimmer.fromColors(
-    baseColor: Colors.grey.shade400,
-    highlightColor: Colors.grey.shade100,
+    baseColor: Colors.lightGreen.shade200,
+    highlightColor: Colors.lightGreen.shade100,
     child: ListView.builder(
       itemCount: 5,
       shrinkWrap: true,
@@ -47,7 +47,7 @@ class Skeleton {
                 Flexible(
                     child: Container(
                   width: double.infinity,
-                  height: 80,
+                  height: 75,
                   decoration: ShapeDecoration(
                       color: Colors.grey[400]!,
                       shape: const RoundedRectangleBorder(
@@ -57,7 +57,7 @@ class Skeleton {
                 SizedBox(
                     width: 150,
                     child: Container(
-                      height: 100,
+                      height: 90,
                       decoration: ShapeDecoration(
                           color: Colors.grey[400]!,
                           shape: const RoundedRectangleBorder(
@@ -72,7 +72,7 @@ class Skeleton {
 
   static Widget shimmerFilter = Shimmer.fromColors(
     baseColor: Colors.grey.shade400,
-    highlightColor: Colors.grey.shade100,
+    highlightColor: Colors.grey.shade200,
     child: Wrap(
       alignment: WrapAlignment.center,
       spacing: 5.0,
@@ -90,8 +90,8 @@ class Skeleton {
   );
 
   static Widget shimmerMateri = Shimmer.fromColors(
-    baseColor: Colors.grey.shade400,
-    highlightColor: Colors.grey.shade100,
+    baseColor: Colors.lightGreen.shade200,
+    highlightColor: Colors.lightGreen.shade100,
     child: ListView.builder(
       itemCount: 5,
       shrinkWrap: true,
@@ -105,7 +105,7 @@ class Skeleton {
                 SizedBox(
                     width: 120,
                     child: Container(
-                      height: 120,
+                      height: 110,
                       decoration: ShapeDecoration(
                           color: Colors.grey[400]!,
                           shape: const RoundedRectangleBorder(
@@ -116,7 +116,7 @@ class Skeleton {
                 Flexible(
                     child: Container(
                   width: double.infinity,
-                  height: 80,
+                  height: 90,
                   decoration: ShapeDecoration(
                       color: Colors.grey[400]!,
                       shape: const RoundedRectangleBorder(
@@ -128,8 +128,8 @@ class Skeleton {
     ),
   );
   static Widget shimmerRekap = Shimmer.fromColors(
-    baseColor: Colors.grey.shade400,
-    highlightColor: Colors.grey.shade100,
+    baseColor: Colors.lightGreen.shade200,
+    highlightColor: Colors.lightGreen.shade100,
     child: ListView.builder(
       itemCount: 3,
       shrinkWrap: true,
@@ -166,8 +166,8 @@ class Skeleton {
   );
 
   static Widget shimmerProfil = Shimmer.fromColors(
-      baseColor: Colors.grey.shade400,
-      highlightColor: Colors.grey.shade100,
+      baseColor: Colors.lightGreen.shade200,
+      highlightColor: Colors.lightGreen.shade100,
       child: Column(
         children: <Widget>[
           verticalSpaceLarge,
@@ -192,7 +192,7 @@ class Skeleton {
           verticalSpaceSmall,
           Expanded(
               child: ListView.builder(
-                  itemCount: 7,
+                  itemCount: 5,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (_, index) {
@@ -210,8 +210,8 @@ class Skeleton {
         ],
       ));
   static Widget shimmerNotif = Shimmer.fromColors(
-      baseColor: Colors.grey.shade400,
-      highlightColor: Colors.grey.shade100,
+      baseColor: Colors.lightGreen.shade200,
+      highlightColor: Colors.lightGreen.shade100,
       child: Padding(
           padding: const EdgeInsets.all(15),
           child: Column(
@@ -276,7 +276,7 @@ class Skeleton {
             ],
           )));
   static Widget shimmerDetailNews = Shimmer.fromColors(
-      baseColor: Colors.grey.shade400,
+      baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Padding(
           padding: EdgeInsets.all(25),
@@ -344,8 +344,8 @@ class Skeleton {
           )));
 
   static Widget shimmerDetailTimeline = Shimmer.fromColors(
-      baseColor: Colors.grey.shade400,
-      highlightColor: Colors.grey.shade100,
+      baseColor: Colors.orange.shade200,
+      highlightColor: Colors.orange.shade100,
       child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ListView(children: <Widget>[
@@ -356,7 +356,7 @@ class Skeleton {
                 verticalSpaceXSmall,
                 Container(
                   width: 210,
-                  height: 22,
+                  height: 23,
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   decoration: ShapeDecoration(
                       color: Colors.grey[400]!,
@@ -373,8 +373,17 @@ class Skeleton {
                 ),
                 verticalSpaceLarge,
                 verticalSpaceSmall,
+                Container(
+                  width: 130,
+                  height: 20,
+                  decoration: ShapeDecoration(
+                      color: Colors.grey[400]!,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)))),
+                ),
+                verticalSpaceSmall,
                 ListView.builder(
-                    itemCount: 6,
+                    itemCount: 5,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (_, index) {
@@ -394,8 +403,8 @@ class Skeleton {
           ])));
 
   static Widget shimmerJadwal = Shimmer.fromColors(
-      baseColor: Colors.grey.shade400,
-      highlightColor: Colors.grey.shade100,
+      baseColor: Colors.orange.shade200,
+      highlightColor: Colors.orange.shade100,
       child: Padding(
           padding: const EdgeInsets.all(20),
           child: ListView.builder(

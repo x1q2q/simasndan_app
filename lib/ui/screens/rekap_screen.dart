@@ -151,26 +151,34 @@ class _RekapScreenState extends State<RekapScreen> {
                       icon:
                           const Icon(Icons.more_vert, size: 45, color: greenv1),
                       onSelected: (MenuPopup item) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => DetailRekapScreen(
-                                    idSantri: box.get('id').toString(),
-                                    idSemester:
-                                        allSemester![index]['id'].toString(),
-                                    semester: allSemester![index]['semester'],
-                                    thPelajaran: allSemester![index]
-                                        ['tahun_pelajaran'])));
+                        if (item.name == 'itemOne') {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DetailRekapScreen(
+                                      idSantri: box.get('id').toString(),
+                                      idSemester:
+                                          allSemester![index]['id'].toString(),
+                                      semester: allSemester![index]['semester'],
+                                      thPelajaran: allSemester![index]
+                                          ['tahun_pelajaran'])));
+                        } else {
+                          // for future
+                        }
                       },
                       itemBuilder: (BuildContext context) =>
                           <PopupMenuEntry<MenuPopup>>[
                             const PopupMenuItem<MenuPopup>(
                               value: MenuPopup.itemOne,
-                              child: Text('Detail'),
+                              child: Text('Timeline'),
                             ),
                             // const PopupMenuItem<MenuPopup>(
                             //   value: MenuPopup.itemTwo,
-                            //   child: Text('Download'),
+                            //   child: Text('Jadwal Harian'),
+                            // ),
+                            // const PopupMenuItem<MenuPopup>(
+                            //   value: MenuPopup.itemTwo,
+                            //   child: Text('Download Rekap'),
                             // ),
                           ]),
                 ],

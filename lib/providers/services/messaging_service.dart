@@ -1,12 +1,15 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import '../../ui/screens/notifikasi_screen.dart';
+import 'general_service.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'general_service.dart';
+import 'notification_service.dart';
 
 class MessagingService {
-  late final Box box = Hive.box('user');
   static String? fcmToken;
+  late final Box box = Hive.box('user');
+
   static final MessagingService _instance = MessagingService._internal();
   factory MessagingService() => _instance;
 
@@ -29,15 +32,17 @@ class MessagingService {
     fcmToken = await _fcm.getToken();
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (message.notification != null && box.get('id') != null) {
-        final notificationData = message.data;
-        final screen = notificationData['screen'];
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      if (message.data != null) {
+        Map<String, dynamic> data = message.data;
+        String judul = data["title"];
+        String pesan = data["body"];
+        final screen = data['screen'];
 
-        notificationData.containsKey('screen');
-        GeneralService().showNotifTitle(
-            message.notification!.title!, message.notification!.body!);
+        data.containsKey('screen');
+        GeneralService().showNotifTitle(judul, pesan);
       }
+      // await NotificationService().pushNotification(message);
     });
 
     FirebaseMessaging.instance.getInitialMessage().then((message) {
@@ -46,22 +51,30 @@ class MessagingService {
       }
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handleNotificationClick(context, message);
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      if (message.data != null) {
+        _handleNotificationClick(context, message);
+      }
     });
   }
 
   void _handleNotificationClick(BuildContext context, RemoteMessage message) {
-    final notificationData = message.data;
-
-    if (notificationData.containsKey('screen')) {
-      final screen = notificationData['screen'];
-      Navigator.of(context).pushNamed(screen);
+    Map<String, dynamic> data = message.data;
+    final screen = data['screen'];
+    if (data.containsKey('screen')) {
+      if (screen == '/notifikasi-screen') {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => NotifikasiScreen(
+                      idSantri: box.get('id'),
+                    )));
+      }
     }
   }
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // debugPrint('Handling a background message: ${message.notification!.title}');
+  await NotificationService().pushNotification(message);
 }

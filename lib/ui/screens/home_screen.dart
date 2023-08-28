@@ -10,7 +10,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../providers/services/messaging_service.dart';
 import '../../providers/services/get_data.dart';
 import '../../core/api.dart';
@@ -37,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   bool _isError = false;
   bool _isLoadAdhanTime = true;
-
+  bool _isErrorLoadAdhan = false;
   String? _currentAddress = '';
   String? _currentAdhanTime = '';
   late final Box box;
@@ -51,7 +50,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _messagingService.init(context);
 
     _getLocation().then((value) {
-      _getAdhanTime(value);
+      if (value != null) {
+        _getAdhanTime(value);
+      } else {
+        _isLoadAdhanTime = false;
+        _isErrorLoadAdhan = true;
+        _currentAddress = 'lokasi tidak ditemukan';
+        _currentAdhanTime = 'jadwal tidak diketahui';
+      }
     });
     _getData();
   }
@@ -72,14 +78,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String?> writeAndGetLocation() async {
-    Position posisi = await LocationService().getCurrentPosition();
-    Map<String, dynamic>? addr =
-        await LocationService().getAddressFromLatLng(posisi);
-    await box.put('kec', addr?["kec"]);
-    await box.put('kab', addr?["kab"]);
-    await box.put('location', addr?["location"]);
-    await box.put('full_location', addr?["full_location"]);
-    return addr?["location"];
+    String loc = '';
+    await LocationService().getCurrentPosition().then((value) async {
+      Map<String, dynamic>? addr =
+          await LocationService().getAddressFromLatLng(value);
+      await box.put('kec', addr?["kec"]);
+      await box.put('kab', addr?["kab"]);
+      await box.put('location', addr?["location"]);
+      await box.put('full_location', addr?["full_location"]);
+      loc = addr?["location"];
+    }).onError((error, stackTrace) {
+      loc = 'unknown';
+    });
+    return loc;
   }
 
   Future<String?> _getLocation() async {
@@ -88,6 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentAddress = locName;
     });
+    if (locName == 'unkown') {
+      return null;
+    }
     return await box.get('kab');
   }
 
@@ -104,8 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
     String? adhanTime =
         await AdhanService().getAdhanTime(now, dataJadwal, args);
     setState(() {
-      _currentAdhanTime = adhanTime;
       _isLoadAdhanTime = false;
+      _isErrorLoadAdhan = false;
+      _currentAdhanTime = adhanTime;
     });
   }
 
@@ -133,7 +148,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRefresh: () async {
                   _getData();
                   _getLocation().then((value) {
-                    _getAdhanTime(value);
+                    _getLocation().then((value) {
+                      if (value != null) {
+                        _getAdhanTime(value);
+                      } else {
+                        _isLoadAdhanTime = false;
+                        _isErrorLoadAdhan = true;
+                        _currentAddress = 'lokasi tidak ditemukan';
+                        _currentAdhanTime = 'jadwal tidak diketahui';
+                      }
+                    });
                   });
                 },
                 child: SingleChildScrollView(
@@ -194,10 +218,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                             builder: (BuildContext context) {
                                               return _isLoadAdhanTime
                                                   ? Skeleton.shimmerJadwal
-                                                  : BoxJadwal(
-                                                      tglNow: tglNow(),
-                                                      fullLoc: fullLocation,
-                                                      dataJadwal: dataJadwal);
+                                                  : _isErrorLoadAdhan
+                                                      ? const BoxJadwal(
+                                                          tglNow:
+                                                              "jadwal tidak diketahui",
+                                                          fullLoc:
+                                                              "lokasi tidak ditemukan",
+                                                          dataJadwal: [],
+                                                        )
+                                                      : BoxJadwal(
+                                                          tglNow:
+                                                              "(Jadwal Sholat Hari ${tglNow()})",
+                                                          fullLoc: fullLocation,
+                                                          dataJadwal:
+                                                              dataJadwal);
                                             });
                                       },
                                       borderRadius: BorderRadius.circular(15),
@@ -210,29 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           children: <Widget>[
                                             _isLoadAdhanTime
                                                 ? Skeleton.shimmerAdhan
-                                                : Expanded(
-                                                    child: Wrap(
-                                                    direction: Axis.vertical,
-                                                    children: <Widget>[
-                                                      Text("$_currentAdhanTime",
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  fontSize: 16,
-                                                                  fontFamily:
-                                                                      'Poppins',
-                                                                  color: Colors
-                                                                      .white)),
-                                                      Text("$_currentAddress",
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 13,
-                                                                  color: Colors
-                                                                      .white)),
-                                                    ],
-                                                  )),
+                                                : locationInfo(context),
                                             CircleAvatar(
                                               backgroundColor: orangev1,
                                               radius: 30,
@@ -342,6 +354,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ))));
+  }
+
+  Widget locationInfo(BuildContext context) {
+    return Expanded(
+        child: Wrap(
+      direction: Axis.vertical,
+      children: <Widget>[
+        Text("$_currentAdhanTime",
+            style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: 'Poppins',
+                color: Colors.white)),
+        Text("$_currentAddress",
+            style: const TextStyle(fontSize: 13, color: Colors.white)),
+      ],
+    ));
   }
 
   Widget boxNews(BuildContext context) {

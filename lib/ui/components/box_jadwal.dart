@@ -24,8 +24,7 @@ class BoxJadwal extends StatelessWidget {
             children: <Widget>[
               Container(
                 padding: const EdgeInsets.all(10),
-                child: Text("(Jadwal Sholat Hari $tglNow)",
-                    style: Styles.whiteStyle),
+                child: Text(tglNow, style: Styles.whiteStyle),
               ),
               ListView.builder(
                   itemCount: dataJadwal!.length,
