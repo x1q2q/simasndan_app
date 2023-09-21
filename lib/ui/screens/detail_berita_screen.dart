@@ -153,20 +153,21 @@ class _DetailBeritaScreenState extends State<DetailBeritaScreen> {
           )),
       Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+          color: Colors.black12,
           child: SizedBox(
-              height: 280,
+              height: 300,
               width: screenSizes.width,
               child: (dtBerita!.media == null)
                   ? Svg.imgNotFoundPortrait
                   : Image.network(
                       "${Api.baseURL}/public/assets/img/uploads/berita/${dtBerita!.media!['nama']}",
-                      fit: BoxFit.cover))),
+                      fit: BoxFit.contain))),
       Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
         child: Text(
           dtBerita!.isi,
           overflow: TextOverflow.ellipsis,
-          maxLines: 250,
+          maxLines: 500,
           textAlign: TextAlign.justify,
         ),
       )

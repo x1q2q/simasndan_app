@@ -240,12 +240,14 @@ class _BeritaScreenState extends State<BeritaScreen> {
                         ),
                         const SizedBox(width: 10),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.3,
+                          height: 90,
+                          width: 130,
                           child: (GeneralService().checkisNoValidImage(
                                   allBerita[index]['media']))
                               ? Svg.imgNotFoundLandscape
                               : Image.network(
-                                  "${Api.baseURL}/public/assets/img/uploads/berita/${allBerita[index]['media']['nama']}"),
+                                  "${Api.baseURL}/public/assets/img/uploads/berita/${allBerita[index]['media']['nama']}",
+                                  fit: BoxFit.cover),
                         ),
                       ],
                     ),

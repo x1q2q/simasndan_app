@@ -54,6 +54,12 @@ class Styles {
       fontWeight: FontWeight.bold,
       color: orangev3);
 
+  static const loginStyle = TextStyle(
+      fontFamily: 'Poppins',
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+      color: Colors.white);
+
   static const boxCardShdStyle = BoxShadow(
       offset: Offset(0, 0),
       blurRadius: 7,

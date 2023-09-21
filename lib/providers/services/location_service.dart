@@ -7,7 +7,6 @@ class LocationService {
   Future<Position> getCurrentPosition() async {
     bool serviceEnabled;
     LocationPermission permission;
-    GeneralService().checkPermission('lokasi');
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       GeneralService().showNotif(false, 'Services lokasi masih disable');
