@@ -16,6 +16,7 @@ import '../../core/api.dart';
 import '../../providers/services/location_service.dart';
 import '../../providers/services/adhan_service.dart';
 import '../../providers/services/general_service.dart';
+import '../../providers/services/fcm_provider.dart';
 import '../components/skeleton.dart';
 import '../components/box_jadwal.dart';
 import '../components/svg.dart';
@@ -45,6 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FCMProvider.setContext(context);
+    });
+
     initializeDateFormatting();
     box = Hive.box('user');
     _messagingService.init(context);
@@ -78,19 +83,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String?> writeAndGetLocation() async {
-    String loc = '';
-    await LocationService().getCurrentPosition().then((value) async {
-      Map<String, dynamic>? addr =
-          await LocationService().getAddressFromLatLng(value);
-      await box.put('kec', addr?["kec"]);
-      await box.put('kab', addr?["kab"]);
-      await box.put('location', addr?["location"]);
-      await box.put('full_location', addr?["full_location"]);
-      loc = addr?["location"];
-    }).onError((error, stackTrace) {
-      loc = 'unknown';
-    });
-    return loc;
+    bool isGranted = await GeneralService().checkPermission('lokasi');
+    String loc = "";
+    if (isGranted) {
+      await LocationService().getCurrentPosition().then((value) async {
+        Map<String, dynamic>? addr =
+            await LocationService().getAddressFromLatLng(value);
+        await box.put('kec', addr?["kec"]);
+        await box.put('kab', addr?["kab"]);
+        await box.put('location', addr?["location"]);
+        await box.put('full_location', addr?["full_location"]);
+        loc = addr?["location"];
+      }).onError((error, stackTrace) {
+        loc = 'unknown';
+      });
+      return loc;
+    }
+    return 'unknown';
   }
 
   Future<String?> _getLocation() async {
@@ -148,16 +157,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 onRefresh: () async {
                   _getData();
                   _getLocation().then((value) {
-                    _getLocation().then((value) {
-                      if (value != null) {
-                        _getAdhanTime(value);
-                      } else {
-                        _isLoadAdhanTime = false;
-                        _isErrorLoadAdhan = true;
-                        _currentAddress = 'lokasi tidak ditemukan';
-                        _currentAdhanTime = 'jadwal tidak diketahui';
-                      }
-                    });
+                    if (value != null) {
+                      _getAdhanTime(value);
+                    } else {
+                      _isLoadAdhanTime = false;
+                      _isErrorLoadAdhan = true;
+                      _currentAddress = 'lokasi tidak ditemukan';
+                      _currentAdhanTime = 'jadwal tidak diketahui';
+                    }
                   });
                 },
                 child: SingleChildScrollView(
@@ -332,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 0,
                       ),
                       Container(
-                          height: 700,
+                          constraints: const BoxConstraints(minHeight: 700),
                           color: lightv1,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,12 +461,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 10),
                       SizedBox(
+                        height: 110,
                         width: 150,
                         child: (GeneralService().checkisNoValidImage(
                                 allBerita![index]['media']))
                             ? Svg.imgNotFoundLandscape
                             : Image.network(
-                                "${Api.baseURL}/public/assets/img/uploads/berita/${allBerita![index]['media']['nama']}"),
+                                "${Api.baseURL}/public/assets/img/uploads/berita/${allBerita![index]['media']['nama']}",
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ],
                   ),

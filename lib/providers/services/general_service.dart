@@ -69,13 +69,15 @@ class GeneralService {
         duration: const Duration(seconds: 10));
   }
 
-  Future<void> checkPermission(String tipe) async {
+  Future<bool> checkPermission(String tipe) async {
     Permission permission =
         (tipe == 'lokasi') ? Permission.location : Permission.notification;
     final status = await permission.request();
     if (!status.isGranted) {
       showNotif(false, "User tidak memberikan ijin akses $tipe");
+      return false;
     }
+    return true;
   }
 
   bool checkisNoValidImage(dynamic foto) {

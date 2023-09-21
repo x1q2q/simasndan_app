@@ -17,7 +17,10 @@ class BoxJadwal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         padding: const EdgeInsets.all(10),
-        color: orangev2,
+        decoration: const BoxDecoration(
+            color: orangev2,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20), topRight: Radius.circular(20))),
         child: ListView(
             shrinkWrap: true,
             physics: const AlwaysScrollableScrollPhysics(),

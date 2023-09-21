@@ -37,8 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var screenSizes = MediaQuery.of(context).size;
-
     return SafeArea(
         child: GestureDetector(
       onTap: () {
@@ -46,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: lightv2,
+        backgroundColor: greenv1,
         body: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -61,8 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               verticalSpaceXSmall,
               const Text(
-                "Simasndan Apps",
-                style: Styles.headStyle,
+                "Simasndan Al-Windan",
+                style: Styles.loginStyle,
               ),
               verticalSpaceSmall,
               Stack(

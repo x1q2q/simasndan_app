@@ -204,12 +204,12 @@ class _ProfilScreenState extends State<ProfilScreen> {
       resTautan["fcm_token"] = fcmToken ?? '-';
       Santri? santri = await GetData().updateUUID(widget.idSantri, resTautan);
       if (resTautan["uuid"] != null && resTautan["email"] != null) {
-        GeneralService()
+        await GeneralService()
             .showNotif(true, 'Anda berhasil menautkan akun ${santri!.email}');
-        GeneralService().checkPermission('notifikasi');
+        await GeneralService().checkPermission('notifikasi');
         await _getData();
       } else {
-        GeneralService()
+        await GeneralService()
             .showNotif(false, 'Silakan pilih akun untuk ditautkan!');
       }
     } catch (e) {
